@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mohammed Sulthan G - Portfolio</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Space Grotesk -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- Base and Layout Styles --- */
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #000;
+            color: #fff;
+            margin: 0;
+            padding: 2rem;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            min-height: 100vh;
+        }
+
+        .page-section.hidden {
+            display: none;
+        }
+
+        /* --- Custom UI Component Styles (from home.html) --- */
+        .ui-card {
+            background-color: #fff;
+            color: #000;
+            font-weight: 700;
+            border-radius: 1.5rem; /* 24px */
+            padding: 1rem 1.5rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+        }
+
+        /* --- Rotating Title Card ("I_AM_A") Styles (from home.html) --- */
+        .rotating-card-container {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem; /* 24px */
+        }
+        .rotating-card-container h1 {
+            font-size: 2.25rem; /* 36px */
+            margin: 0;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .rotating-card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 300px;
+            height: 70px;
+            padding: 0 1.5rem; /* 24px */
+            background: #fff;
+            color: #000;
+            border-radius: 1.5rem; /* 24px */
+            font-weight: 700;
+            font-size: 2rem; /* 32px */
+            position: relative;
+            overflow: hidden;
+            transition: width 0.4s ease;
+            white-space: nowrap;
+        }
+        .slot {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .word {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            opacity: 0;
+            transform: translateY(20px) scale(.95);
+        }
+        .word.in {
+            animation: enter 0.5s ease-out forwards;
+        }
+        .word.out {
+            animation: exit 0.5s ease-in forwards;
+        }
+        @keyframes enter {
+            from { opacity: 0; transform: translateY(20px) scale(.95); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes exit {
+            from { opacity: 1; transform: translateY(0) scale(1); }
+            to   { opacity: 0; transform: translateY(-20px) scale(.95); }
+        }
+
+        /* --- Content Card Styles (from About me.html) --- */
+        .content-card {
+            border: 2px solid #fff;
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            background-color: #000;
+        }
+
+        /* --- Custom List Styles (from About me.html) --- */
+        .custom-list li {
+            padding-left: 2rem;
+            position: relative;
+        }
+        .custom-list li::before {
+            content: '+';
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: #4f46e5; /* Indigo color */
+            font-size: 1.5rem;
+            font-weight: bold;
+            line-height: 1.5rem;
+        }
+
+        /* --- Dock Component Styles (Merged & Refined) --- */
+        .dock-panel {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: flex-end;
+            gap: 0.5rem;
+            border-radius: 1.5rem;
+            background-color: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid #333;
+            padding: 0.5rem;
+            z-index: 50;
+        }
+        .dock-item {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            cursor: pointer;
+            outline: none;
+            transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .dock-item:hover {
+            transform: translateY(-8px);
+        }
+        .dock-label {
+            position: absolute;
+            top: -2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            background-color: #333;
+            color: #fff;
+            font-size: 0.875rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+            pointer-events: none;
+        }
+        .dock-item:hover .dock-label {
+            opacity: 1;
+            visibility: visible;
+        }
+        .dock-icon-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 3.5rem;
+            height: 3.5rem;
+            background-color: transparent;
+            border-radius: 0.75rem;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .dock-item.active .dock-icon-wrapper {
+            background-color: #2a2a2a;
+        }
+        .dock-text-icon {
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        .dock-indicator {
+            width: 0.5rem;
+            height: 0.25rem;
+            background-color: transparent;
+            border-radius: 9999px;
+            margin-top: 0.5rem;
+            transition: background-color 0.3s ease-in-out;
+        }
+        .dock-item.active .dock-indicator {
+            background-color: #fff;
+        }
+
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            .photo-card {
+                grid-row: auto; /* Reset row span */
+                height: 300px;
+            }
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            .rotating-card-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            .rotating-card {
+                min-width: 280px;
+                font-size: 1.5rem;
+                height: 60px;
+            }
+            .dock-panel {
+                gap: 0.25rem;
+                bottom: 1rem;
+                padding: 0.25rem;
+            }
+            .dock-icon-wrapper {
+                width: 3rem;
+                height: 3rem;
+            }
+            .dock-label {
+                top: -2rem;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- HOME SECTION -->
+    <main id="home-section" class="page-section">
+        <div class="main-grid container mx-auto p-8 lg:p-16 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start mb-40">
+            <!-- Left Column -->
+            <div class="flex flex-col gap-8">
+                <!-- HOME Card -->
+                <div class="ui-card text-4xl">
+                    HOME
+                </div>
+                <!-- Name / Translation Card -->
+                <div id="translation-card" class="bg-white text-black p-6 rounded-3xl flex items-center justify-between transition-all duration-300 transform scale-100 shadow-xl">
+                    <div id="text-container" class="flex flex-col">
+                        <h2 id="greeting" class="text-sm font-normal uppercase transition-opacity duration-300">HELLO, I'M</h2>
+                        <h1 id="name" class="text-4xl sm:text-5xl font-bold mt-1 transition-opacity duration-300">MOHAMMED SULTHAN G</h1>
+                    </div>
+                    <button id="translate-button" class="flex-shrink-0 w-12 h-12 rounded-full bg-black text-white flex items-center justify-center cursor-pointer transform transition-transform duration-300 hover:rotate-180">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path>
+                        </svg>
+                    </button>
+                </div>
+                <!-- Rotating Title Card -->
+                <div class="rotating-card-container">
+                    <h1>I_AM_A</h1>
+                    <div class="rotating-card" id="rotating-card">
+                        <div class="slot" id="slot"></div>
+                    </div>
+                </div>
+                <!-- RESUME Card -->
+                <div class="ui-card text-3xl gap-4">
+                    RESUME
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                </div>
+            </div>
+            <!-- Right Column (PHOTO Card) -->
+            <div class="photo-card w-full h-full min-h-[400px] lg:row-span-3 bg-white text-black rounded-3xl flex items-center justify-center">
+                 <span class="text-5xl font-bold">PHOTO</span>
+            </div>
+        </div>
+    </main>
+    
+    <!-- ABOUT ME SECTION -->
+    <main id="about-section" class="page-section hidden">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-8 mb-40">
+            <!-- Column 1 -->
+            <div class="md:col-span-4 space-y-8">
+                <div class="content-card">
+                     <h1 class="text-4xl font-bold tracking-widest mb-2">ABOUT ME</h1>
+                </div>
+                <div class="content-card">
+                    <h2 class="text-3xl font-bold tracking-wider mb-4">WHAT I DO</h2>
+                    <hr class="border-white mb-6">
+                    <ul class="space-y-4 custom-list">
+                        <li>DEVELOP APPS, GAMES, AND WEB PROJECTS THAT COMBINE FUNCTIONALITY WITH SIMPLICITY.</li>
+                        <li>WORK ON AI, MACHINE LEARNING, AND INNOVATIVE PROBLEM-SOLVING PROJECTS.</li>
+                        <li>CONSTANTLY LEARN AND SHARE KNOWLEDGE THROUGH HANDS-ON PRACTICE.</li>
+                    </ul>
+                </div>
+                 <div class="content-card flex items-center justify-between">
+                    <h2 class="text-4xl font-bold tracking-widest">RESUME</h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+                </div>
+            </div>
+
+            <!-- Column 2 -->
+            <div class="md:col-span-5 space-y-8">
+                <div class="content-card">
+                    <p class="text-lg leading-relaxed">
+                        <span class="font-bold">HI, I'M MOHAMMED SULTHAN G</span><br><br>
+                        I'M PASSIONATE ABOUT TECHNOLOGY, CREATIVITY, AND PROBLEM-SOLVING. MY JOURNEY STARTED WITH A CURIOSITY TO UNDERSTAND HOW THINGS WORK, WHICH NATURALLY GREW INTO LEARNING PROGRAMMING, BUILDING PROJECTS, AND EXPLORING REAL-WORLD APPLICATIONS OF TECH.
+                    </p>
+                </div>
+                 <div class="content-card">
+                    <h2 class="text-3xl font-bold tracking-wider mb-4">INTERESTS</h2>
+                    <hr class="border-white mb-6">
+                    <ul class="space-y-4 custom-list">
+                        <li>EXPLORING NEW TECHNOLOGIES AND FRAMEWORKS.</li>
+                        <li>CREATING USER-FRIENDLY APPS & WEBSITES.</li>
+                        <li>ARTIFICIAL INTELLIGENCE, DEEP LEARNING, AND DATA SCIENCE.</li>
+                        <li>COMMUNITY LEARNING.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Column 3 -->
+            <div class="md:col-span-3">
+                 <div class="content-card h-full flex items-center justify-center">
+                    <span class="text-4xl font-bold tracking-widest">PHOTO</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Dock Navigation -->
+    <div class="dock-panel">
+        <div class="dock-item active" data-target="home-section">
+            <span class="dock-label">Home</span>
+            <div class="dock-icon-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
+            <div class="dock-indicator"></div>
+        </div>
+        <div class="dock-item" data-target="about-section">
+            <span class="dock-label">About Me</span>
+            <div class="dock-icon-wrapper">
+                <span class="dock-text-icon">me</span>
+            </div>
+            <div class="dock-indicator"></div>
+        </div>
+        <div class="dock-item">
+            <span class="dock-label">Skills</span>
+            <div class="dock-icon-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
+            </div>
+            <div class="dock-indicator"></div>
+        </div>
+        <div class="dock-item">
+            <span class="dock-label">Projects</span>
+            <div class="dock-icon-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1.3.5 2.6 1.5 3.5.8.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+            </div>
+            <div class="dock-indicator"></div>
+        </div>
+        <div class="dock-item">
+            <span class="dock-label">Experience</span>
+            <div class="dock-icon-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m18 10-5 5-4-4-3 3"/></svg>
+            </div>
+            <div class="dock-indicator"></div>
+        </div>
+        <div class="dock-item">
+            <span class="dock-label">Certifications</span>
+            <div class="dock-icon-wrapper">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 1v17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V1"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M12 16H8"/></svg>
+            </div>
+            <div class="dock-indicator"></div>
+        </div>
+        <div class="dock-item">
+            <span class="dock-label">Contact</span>
+            <div class="dock-icon-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div class="dock-indicator"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Dock and Page Switching Logic ---
+            const dockItems = document.querySelectorAll('.dock-item');
+            const pageSections = document.querySelectorAll('.page-section');
+
+            // Set initial active state
+            document.querySelector('.dock-item[data-target="home-section"]')?.classList.add('active');
+
+            dockItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const targetId = item.getAttribute('data-target');
+                    if (!targetId) return; // Ignore items without a target
+
+                    // Update active state on dock items
+                    dockItems.forEach(otherItem => {
+                        otherItem.classList.remove('active');
+                    });
+                    item.classList.add('active');
+                    
+                    // Show/Hide page sections
+                    pageSections.forEach(section => {
+                        if (section.id === targetId) {
+                            section.classList.remove('hidden');
+                        } else {
+                            section.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+
+            // --- Translation Card Logic (from home.html) ---
+            const translateButton = document.getElementById('translate-button');
+            const greetingElement = document.getElementById('greeting');
+            const nameElement = document.getElementById('name');
+            let isEnglish = true;
+            const translations = {
+                english: { greeting: "HELLO, I'M", name: "MOHAMMED SULTHAN G" },
+                japanese: { greeting: "こんにちは, わたしは", name: "モハメド・スルタン" }
+            };
+            translateButton.addEventListener('click', () => {
+                const nextLang = isEnglish ? 'japanese' : 'english';
+                greetingElement.style.opacity = '0';
+                nameElement.style.opacity = '0';
+                setTimeout(() => {
+                    greetingElement.textContent = translations[nextLang].greeting;
+                    nameElement.textContent = translations[nextLang].name;
+                    greetingElement.style.opacity = '1';
+                    nameElement.style.opacity = '1';
+                    isEnglish = !isEnglish;
+                }, 300);
+            });
+
+            // --- Rotating Title Card Logic (from home.html) ---
+            const roles = ["Developer", "UI/UX Designer", "Engineer", "Problem Solver", "Creator", "Open-Source Contributor"];
+            const slot = document.getElementById("slot");
+            const card = document.getElementById("rotating-card");
+            let i = 0;
+            function showWord(text) {
+                const el = document.createElement("div");
+                el.className = "word";
+                el.textContent = text;
+                slot.appendChild(el);
+
+                const temp = document.createElement("span");
+                temp.style.fontSize = getComputedStyle(card).fontSize;
+                temp.style.fontWeight = getComputedStyle(card).fontWeight;
+                temp.style.fontFamily = getComputedStyle(card).fontFamily;
+                temp.style.visibility = "hidden";
+                temp.style.position = "absolute";
+                temp.textContent = text;
+                document.body.appendChild(temp);
+                let newWidth = Math.max(300, temp.offsetWidth + 80); // base width + padding
+                card.style.width = newWidth + "px";
+                document.body.removeChild(temp);
+                
+                requestAnimationFrame(() => el.classList.add("in"));
+                
+                setTimeout(() => {
+                    el.classList.remove("in");
+                    el.classList.add("out");
+                    el.addEventListener("animationend", () => {
+                        if (el.classList.contains("out")) el.remove();
+                    }, { once: true });
+                }, 2000);
+            }
+            function cycle() {
+                if(document.getElementById('home-section').classList.contains('hidden')) return; // Only run if home is visible
+                showWord(roles[i % roles.length]);
+                i++;
+            }
+            // Initial call and interval
+            if(!document.getElementById('home-section').classList.contains('hidden')) {
+                 cycle();
+            }
+            setInterval(cycle, 2600);
+        });
+    </script>
+
+</body>
+</html>
