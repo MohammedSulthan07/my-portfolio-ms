@@ -345,6 +345,42 @@
         </div>
     </main>
 
+    <!-- CONTACT SECTION -->
+    <main id="contact-section" class="page-section hidden flex flex-col items-center justify-center min-h-screen p-5">
+        <div class="relative w-full max-w-4xl p-10 rounded-2xl shadow-xl space-y-10">
+            <!-- Contact Title -->
+            <div class="flex items-center space-x-4">
+                <div class="bg-white text-black text-4xl font-bold py-2 px-8 rounded-lg">CONTACT</div>
+            </div>
+
+            <!-- Social Links Container -->
+            <div class="flex flex-col md:flex-row justify-center items-center md:space-x-8 space-y-8 md:space-y-0">
+
+                <!-- Email Card -->
+                <div class="bg-black bg-opacity-70 p-6 rounded-lg border border-gray-800 flex flex-col items-center space-y-4 w-full md:w-1/3 max-w-xs">
+                    <img src="email.png" alt="Email Icon" class="w-20 h-20 rounded-full object-cover">
+                    <img src="emailtext.png" alt="Email Text" class="w-40 h-8 mt-2">
+                    <p class="text-xs text-gray-400">MSULTHAN139@GMAIL.COM</p>
+                </div>
+
+                <!-- LinkedIn Card -->
+                <div class="bg-black bg-opacity-70 p-6 rounded-lg border border-gray-800 flex flex-col items-center space-y-4 w-full md:w-1/3 max-w-xs">
+                    <img src="linkedin.png" alt="LinkedIn Icon" class="w-20 h-20 rounded-full object-cover">
+                    <img src="linkedintext.png" alt="LinkedIn Text" class="w-40 h-8 mt-2">
+                    <a href="https://www.linkedin.com/in/mohammed-suithan-b64b17308" target="_blank" class="px-6 py-2 rounded-full text-sm font-semibold border-2 border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition-colors duration-300">CLICK TO VIEW</a>
+                </div>
+
+                <!-- GitHub Card -->
+                <div class="bg-black bg-opacity-70 p-6 rounded-lg border border-gray-800 flex flex-col items-center space-y-4 w-full md:w-1/3 max-w-xs">
+                    <img src="github.png" alt="GitHub Icon" class="w-20 h-20 rounded-full object-cover">
+                    <img src="githubtext.png" alt="GitHub Text" class="w-40 h-8 mt-2">
+                    <a href="https://github.com/MohammedSulthan07" target="_blank" class="px-6 py-2 rounded-full text-sm font-semibold border-2 border-white text-white hover:bg-white hover:text-black transition-colors duration-300">CLICK TO VIEW</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
     <!-- Dock Navigation -->
     <div class="dock-panel">
         <div class="dock-item active" data-target="home-section">
@@ -361,35 +397,35 @@
             </div>
             <div class="dock-indicator"></div>
         </div>
-        <div class="dock-item">
+        <div class="dock-item" data-target="skills-section">
             <span class="dock-label">Skills</span>
             <div class="dock-icon-wrapper">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
             </div>
             <div class="dock-indicator"></div>
         </div>
-        <div class="dock-item">
+        <div class="dock-item" data-target="projects-section">
             <span class="dock-label">Projects</span>
             <div class="dock-icon-wrapper">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1.3.5 2.6 1.5 3.5.8.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
             </div>
             <div class="dock-indicator"></div>
         </div>
-        <div class="dock-item">
+        <div class="dock-item" data-target="experience-section">
             <span class="dock-label">Experience</span>
             <div class="dock-icon-wrapper">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m18 10-5 5-4-4-3 3"/></svg>
             </div>
             <div class="dock-indicator"></div>
         </div>
-        <div class="dock-item">
+        <div class="dock-item" data-target="certifications-section">
             <span class="dock-label">Certifications</span>
             <div class="dock-icon-wrapper">
                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 1v17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V1"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M12 16H8"/></svg>
             </div>
             <div class="dock-indicator"></div>
         </div>
-        <div class="dock-item">
+        <div class="dock-item" data-target="contact-section">
             <span class="dock-label">Contact</span>
             <div class="dock-icon-wrapper">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -410,7 +446,11 @@
             dockItems.forEach(item => {
                 item.addEventListener('click', () => {
                     const targetId = item.getAttribute('data-target');
-                    if (!targetId) return; // Ignore items without a target
+                    if (!targetId) {
+                        // Optional: alert or log that this section is not yet built
+                        console.log(`The section for "${item.querySelector('.dock-label').textContent}" is under construction.`);
+                        return;
+                    } 
 
                     // Update active state on dock items
                     dockItems.forEach(otherItem => {
@@ -485,12 +525,13 @@
                 }, 2000);
             }
             function cycle() {
-                if(document.getElementById('home-section').classList.contains('hidden')) return; // Only run if home is visible
+                // Only run the animation if the home section is visible
+                if (document.getElementById('home-section').classList.contains('hidden')) return;
                 showWord(roles[i % roles.length]);
                 i++;
             }
             // Initial call and interval
-            if(!document.getElementById('home-section').classList.contains('hidden')) {
+            if (!document.getElementById('home-section').classList.contains('hidden')) {
                  cycle();
             }
             setInterval(cycle, 2600);
@@ -499,3 +540,4 @@
 
 </body>
 </html>
+
