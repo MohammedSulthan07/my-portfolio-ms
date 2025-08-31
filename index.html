@@ -293,16 +293,21 @@
           transition:max-height .5s ease;
         }
         .cert-section-container .scroll-container{
+          display: flex;
           overflow:hidden;
-          white-space:nowrap;
           padding:20px 0;
         }
         .cert-section-container .track{
-          display:inline-flex;
+          display: flex;
           align-items:center;
           gap:26px;
           padding:2px;
           animation:marquee 30s linear infinite;
+          animation-play-state: running;
+          flex-shrink: 0;
+        }
+        .cert-section-container .scroll-container:hover .track {
+            animation-play-state: paused;
         }
         @keyframes marquee{
           0%{ transform:translateX(0); }
@@ -359,7 +364,7 @@
                         <h1 id="name" class="text-4xl sm:text-5xl font-bold mt-1 transition-opacity duration-300">MOHAMMED SULTHAN G</h1>
                     </div>
                     <button id="translate-button" class="flex-shrink-0 w-12 h-12 rounded-full bg-black text-white flex items-center justify-center cursor-pointer transform transition-transform duration-300 hover:rotate-180">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path>
                         </svg>
                     </button>
@@ -745,7 +750,7 @@
         <div class="dock-item" data-target="certifications-section">
             <span class="dock-label">Certifications</span>
             <div class="dock-icon-wrapper">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 1v17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V1"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M12 16H8"/></svg>
+                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 1v17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V1"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M12 16H8"/></svg>
             </div>
             <div class="dock-indicator"></div>
         </div>
@@ -796,18 +801,20 @@
                 english: { greeting: "HELLO, I'M", name: "MOHAMMED SULTHAN G" },
                 japanese: { greeting: "こんにちは, わたしは", name: "モハメド・スルタン" }
             };
-            translateButton.addEventListener('click', () => {
-                const nextLang = isEnglish ? 'japanese' : 'english';
-                greetingElement.style.opacity = '0';
-                nameElement.style.opacity = '0';
-                setTimeout(() => {
-                    greetingElement.textContent = translations[nextLang].greeting;
-                    nameElement.textContent = translations[nextLang].name;
-                    greetingElement.style.opacity = '1';
-                    nameElement.style.opacity = '1';
-                    isEnglish = !isEnglish;
-                }, 300);
-            });
+            if (translateButton) {
+                translateButton.addEventListener('click', () => {
+                    const nextLang = isEnglish ? 'japanese' : 'english';
+                    greetingElement.style.opacity = '0';
+                    nameElement.style.opacity = '0';
+                    setTimeout(() => {
+                        greetingElement.textContent = translations[nextLang].greeting;
+                        nameElement.textContent = translations[nextLang].name;
+                        greetingElement.style.opacity = '1';
+                        nameElement.style.opacity = '1';
+                        isEnglish = !isEnglish;
+                    }, 300);
+                });
+            }
 
             // --- Rotating Title Card Logic (from home.html) ---
             const roles = ["Developer", "UI/UX Designer", "Engineer", "Problem Solver", "Creator", "Open-Source Contributor"];
@@ -843,11 +850,14 @@
                 }, 2000);
             }
             function cycle() {
-                if (document.getElementById('home-section').classList.contains('hidden')) return;
-                showWord(roles[i % roles.length]);
-                i++;
+                if (document.getElementById('home-section')?.classList.contains('hidden')) return;
+                if(slot && card) {
+                    showWord(roles[i % roles.length]);
+                    i++;
+                }
             }
-            if (!document.getElementById('home-section').classList.contains('hidden')) {
+
+            if (document.getElementById('home-section') && !document.getElementById('home-section').classList.contains('hidden')) {
                  cycle();
             }
             setInterval(cycle, 2600);
