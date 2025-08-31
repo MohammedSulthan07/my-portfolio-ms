@@ -23,6 +23,10 @@
             min-height: 100vh;
         }
 
+        .page-section {
+            padding-bottom: 120px; /* space for dock */
+        }
+
         .page-section.hidden {
             display: none;
         }
@@ -246,13 +250,102 @@
                 font-size: 0.75rem;
             }
         }
+        
+        /* --- Styles from certificates.html --- */
+        .cert-section-container {
+            --bg:#000;
+            --fg:#fff;
+            --card:#0b0b0b;
+            --border:#fff;
+        }
+        .cert-section-container .title{
+          display:inline-block;
+          margin:24px;
+          padding:14px 22px;
+          background:#fff;
+          color:#000;
+          font-weight:700;
+          font-size:38px;
+          border-radius:14px;
+          letter-spacing:1px;
+        }
+        .cert-section-container .category{
+          margin:12px 20px;
+          padding:22px;
+          text-align:center;
+          font-weight:700;
+          font-size:28px;
+          letter-spacing:1px;
+          background:#0a0a0a;
+          border:2px solid var(--border);
+          border-radius:18px;
+          cursor:pointer;
+          user-select:none;
+          transition:background .2s ease;
+        }
+        .cert-section-container .category:hover{ background:#111; }
+        .cert-section-container .cert-section{
+          margin:6px 20px 18px;
+          background:transparent;
+          border-radius:14px;
+          overflow:hidden;
+          max-height:0;
+          transition:max-height .5s ease;
+        }
+        .cert-section-container .scroll-container{
+          overflow:hidden;
+          white-space:nowrap;
+          padding:20px 0;
+        }
+        .cert-section-container .track{
+          display:inline-flex;
+          align-items:center;
+          gap:26px;
+          padding:2px;
+          animation:marquee 30s linear infinite;
+        }
+        @keyframes marquee{
+          0%{ transform:translateX(0); }
+          100%{ transform:translateX(-50%); }
+        }
+        @media (prefers-reduced-motion: reduce){
+          .cert-section-container .track{ animation:none; }
+        }
+        .cert-section-container .pair{
+          display:flex;
+          align-items:center;
+          gap:14px;
+          padding:12px 16px;
+          background:var(--card);
+          border:1px solid rgba(255,255,255,.15);
+          border-radius:12px;
+          box-shadow:0 6px 20px rgba(255,255,255,.08);
+        }
+        .cert-section-container .pair img{
+          height:180px;
+          width:auto;
+          border-radius:10px;
+          display:block;
+          box-shadow:0 4px 12px rgba(255,255,255,.18);
+          transition:transform .25s ease;
+        }
+        .cert-section-container .pair img:hover{ transform:scale(1.04); }
+        .cert-section-container .single{
+          display:flex;
+          justify-content:center;
+          padding:24px 10px 28px;
+        }
+        .cert-section-container .single .pair img{ height:220px; }
+        .cert-section-container img[onerror]{ background:#111; }
+        .cert-section-container .hide{ display:none !important; }
+
     </style>
 </head>
 <body class="antialiased">
 
     <!-- HOME SECTION -->
     <main id="home-section" class="page-section">
-        <div class="main-grid container mx-auto p-8 lg:p-16 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start mb-40">
+        <div class="main-grid container mx-auto p-8 lg:p-16 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
             <!-- Left Column -->
             <div class="flex flex-col gap-8">
                 <!-- HOME Card -->
@@ -295,7 +388,7 @@
     
     <!-- ABOUT ME SECTION -->
     <main id="about-section" class="page-section hidden">
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-8 mb-40">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
             <!-- Column 1 -->
             <div class="md:col-span-4 space-y-8">
                 <div class="content-card">
@@ -380,6 +473,237 @@
         </div>
     </main>
 
+    <!-- CERTIFICATES SECTION -->
+    <main id="certifications-section" class="page-section hidden cert-section-container">
+        <div class="title">CERTIFICATES</div>
+
+        <!-- ===== Category: CISCO (5) – cert + badge ===== -->
+        <div class="category" data-target="cisco">CISCO</div>
+        <div id="cisco" class="cert-section">
+            <div class="scroll-container">
+            <div class="track">
+                <!-- set A -->
+                <a class="pair" href="c1.pdf" target="_blank" rel="noopener">
+                <img src="c1.png" alt="Cisco 1" onerror="this.classList.add('hide')">
+                <img src="cbadge1.png" alt="Cisco 1 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="c2.pdf" target="_blank" rel="noopener">
+                <img src="c2.png" alt="Cisco 2" onerror="this.classList.add('hide')">
+                <img src="cbadge2.png" alt="Cisco 2 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="c3.pdf" target="_blank" rel="noopener">
+                <img src="c3.png" alt="Cisco 3" onerror="this.classList.add('hide')">
+                <img src="cbadge3.png" alt="Cisco 3 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="c4.pdf" target="_blank" rel="noopener">
+                <img src="c4.png" alt="Cisco 4" onerror="this.classList.add('hide')">
+                <img src="cbadge4.png" alt="Cisco 4 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="c5.pdf" target="_blank" rel="noopener">
+                <img src="c5.png" alt="Cisco 5" onerror="this.classList.add('hide')">
+                <img src="cbadge5.png" alt="Cisco 5 Badge" onerror="this.classList.add('hide')">
+                </a>
+
+                <!-- set B (duplicate for seamless loop) -->
+                <a class="pair" href="c1.pdf" target="_blank" rel="noopener">
+                <img src="c1.png" alt="Cisco 1" onerror="this.classList.add('hide')">
+                <img src="cbadge1.png" alt="Cisco 1 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="c2.pdf" target="_blank" rel="noopener">
+                <img src="c2.png" alt="Cisco 2" onerror="this.classList.add('hide')">
+                <img src="cbadge2.png" alt="Cisco 2 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="c3.pdf" target="_blank" rel="noopener">
+                <img src="c3.png" alt="Cisco 3" onerror="this.classList.add('hide')">
+                <img src="cbadge3.png" alt="Cisco 3 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="c4.pdf" target="_blank" rel="noopener">
+                <img src="c4.png" alt="Cisco 4" onerror="this.classList.add('hide')">
+                <img src="cbadge4.png" alt="Cisco 4 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="c5.pdf" target="_blank" rel="noopener">
+                <img src="c5.png" alt="Cisco 5" onerror="this.classList.add('hide')">
+                <img src="cbadge5.png" alt="Cisco 5 Badge" onerror="this.classList.add('hide')">
+                </a>
+            </div>
+            </div>
+        </div>
+
+        <!-- ===== Category: COURSERA (3) – cert + badge ===== -->
+        <div class="category" data-target="coursera">COURSERA</div>
+        <div id="coursera" class="cert-section">
+            <div class="scroll-container">
+            <div class="track">
+                <!-- set A -->
+                <a class="pair" href="co1.pdf" target="_blank" rel="noopener">
+                <img src="co1.png" alt="Coursera 1" onerror="this.classList.add('hide')">
+                <img src="cobadge1.png" alt="Coursera 1 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="co2.pdf" target="_blank" rel="noopener">
+                <img src="co2.png" alt="Coursera 2" onerror="this.classList.add('hide')">
+                <img src="cobadge2.png" alt="Coursera 2 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="co3.pdf" target="_blank" rel="noopener">
+                <img src="co3.png" alt="Coursera 3" onerror="this.classList.add('hide')">
+                <img src="cobadge3.png" alt="Coursera 3 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <!-- set B -->
+                <a class="pair" href="co1.pdf" target="_blank" rel="noopener">
+                <img src="co1.png" alt="Coursera 1" onerror="this.classList.add('hide')">
+                <img src="cobadge1.png" alt="Coursera 1 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="co2.pdf" target="_blank" rel="noopener">
+                <img src="co2.png" alt="Coursera 2" onerror="this.classList.add('hide')">
+                <img src="cobadge2.png" alt="Coursera 2 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="co3.pdf" target="_blank" rel="noopener">
+                <img src="co3.png" alt="Coursera 3" onerror="this.classList.add('hide')">
+                <img src="cobadge3.png" alt="Coursera 3 Badge" onerror="this.classList.add('hide')">
+                </a>
+            </div>
+            </div>
+        </div>
+
+        <!-- ===== Category: HACKER RANK (6) ===== -->
+        <div class="category" data-target="hackerrank">HACKER RANK</div>
+        <div id="hackerrank" class="cert-section">
+            <div class="scroll-container">
+            <div class="track">
+                <!-- A + B -->
+                <!-- A -->
+                <a class="pair" href="h1.pdf" target="_blank" rel="noopener"><img src="h1.png" alt="HackerRank 1" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="h2.pdf" target="_blank" rel="noopener"><img src="h2.png" alt="HackerRank 2" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="h3.pdf" target="_blank" rel="noopener"><img src="h3.png" alt="HackerRank 3" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="h4.pdf" target="_blank" rel="noopener"><img src="h4.png" alt="HackerRank 4" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="h5.pdf" target="_blank" rel="noopener"><img src="h5.png" alt="HackerRank 5" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="h6.pdf" target="_blank" rel="noopener"><img src="h6.png" alt="HackerRank 6" onerror="this.classList.add('hide')"></a>
+                <!-- B -->
+                <a class="pair" href="h1.pdf" target="_blank" rel="noopener"><img src="h1.png" alt="HackerRank 1" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="h2.pdf" target="_blank" rel="noopener"><img src="h2.png" alt="HackerRank 2" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="h3.pdf" target="_blank" rel="noopener"><img src="h3.png" alt="HackerRank 3" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="h4.pdf" target="_blank" rel="noopener"><img src="h4.png" alt="HackerRank 4" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="h5.pdf" target="_blank" rel="noopener"><img src="h5.png" alt="HackerRank 5" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="h6.pdf" target="_blank" rel="noopener"><img src="h6.png" alt="HackerRank 6" onerror="this.classList.add('hide')"></a>
+            </div>
+            </div>
+        </div>
+
+        <!-- ===== Category: HAYAKAWA (1) – single ===== -->
+        <div class="category" data-target="hayakawa">HAYAKAWA (JAPANESE)</div>
+        <div id="hayakawa" class="cert-section">
+            <div class="single">
+            <a class="pair" href="ha1.pdf" target="_blank" rel="noopener">
+                <img src="ha1.png" alt="Hayakawa" onerror="this.classList.add('hide')">
+            </a>
+            </div>
+        </div>
+
+        <!-- ===== Category: IBM (2) – cert + badge ===== -->
+        <div class="category" data-target="ibm">IBM</div>
+        <div id="ibm" class="cert-section">
+            <div class="scroll-container">
+            <div class="track">
+                <!-- A -->
+                <a class="pair" href="ibm1.pdf" target="_blank" rel="noopener">
+                <img src="ibm1.png" alt="IBM 1" onerror="this.classList.add('hide')">
+                <img src="ibmbadge1.png" alt="IBM 1 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="ibm2.pdf" target="_blank" rel="noopener">
+                <img src="ibm2.png" alt="IBM 2" onerror="this.classList.add('hide')">
+                <img src="ibmbadge2.png" alt="IBM 2 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <!-- B -->
+                <a class="pair" href="ibm1.pdf" target="_blank" rel="noopener">
+                <img src="ibm1.png" alt="IBM 1" onerror="this.classList.add('hide')">
+                <img src="ibmbadge1.png" alt="IBM 1 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="ibm2.pdf" target="_blank" rel="noopener">
+                <img src="ibm2.png" alt="IBM 2" onerror="this.classList.add('hide')">
+                <img src="ibmbadge2.png" alt="IBM 2 Badge" onerror="this.classList.add('hide')">
+                </a>
+            </div>
+            </div>
+        </div>
+
+        <!-- ===== Category: INFOSYS (19) ===== -->
+        <div class="category" data-target="infosys">INFOSYS</div>
+        <div id="infosys" class="cert-section">
+            <div class="scroll-container">
+            <div class="track">
+                <a class="pair" href="i1.pdf" target="_blank" rel="noopener"><img src="i1.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i2.pdf" target="_blank" rel="noopener"><img src="i2.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i3.pdf" target="_blank" rel="noopener"><img src="i3.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i4.pdf" target="_blank" rel="noopener"><img src="i4.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i5.pdf" target="_blank" rel="noopener"><img src="i5.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i6.pdf" target="_blank" rel="noopener"><img src="i6.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i7.pdf" target="_blank" rel="noopener"><img src="i7.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i8.pdf" target="_blank" rel="noopener"><img src="i8.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i9.pdf" target="_blank" rel="noopener"><img src="i9.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i10.pdf" target="_blank" rel="noopener"><img src="i10.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i11.pdf" target="_blank" rel="noopener"><img src="i11.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i12.pdf" target="_blank" rel="noopener"><img src="i12.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i13.pdf" target="_blank" rel="noopener"><img src="i13.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i14.pdf" target="_blank" rel="noopener"><img src="i14.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i15.pdf" target="_blank" rel="noopener"><img src="i15.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i16.pdf" target="_blank" rel="noopener"><img src="i16.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i17.pdf" target="_blank" rel="noopener"><img src="i17.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i18.pdf" target="_blank" rel="noopener"><img src="i18.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i19.pdf" target="_blank" rel="noopener"><img src="i19.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i1.pdf" target="_blank" rel="noopener"><img src="i1.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i2.pdf" target="_blank" rel="noopener"><img src="i2.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i3.pdf" target="_blank" rel="noopener"><img src="i3.png" alt="" onerror="this.classList.add('hide')"></a>
+            </div>
+            </div>
+        </div>
+
+        <!-- ===== Category: MONGO DB (1) – cert + badge but single ===== -->
+        <div class="category" data-target="mongodb">MONGO DB</div>
+        <div id="mongodb" class="cert-section">
+            <div class="single">
+            <a class="pair" href="m1.pdf" target="_blank" rel="noopener">
+                <img src="m1.png" alt="MongoDB" onerror="this.classList.add('hide')">
+                <img src="mbadge1.png" alt="MongoDB Badge" onerror="this.classList.add('hide')">
+            </a>
+            </div>
+        </div>
+
+        <!-- ===== Category: NPTEL (3) ===== -->
+        <div class="category" data-target="nptel">NPTEL</div>
+        <div id="nptel" class="cert-section">
+            <div class="scroll-container">
+            <div class="track">
+                <a class="pair" href="n1.pdf" target="_blank" rel="noopener"><img src="n1.png" alt="NPTEL 1" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="n2.pdf" target="_blank" rel="noopener"><img src="n2.png" alt="NPTEL 2" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="n3.pdf" target="_blank" rel="noopener"><img src="n3.png" alt="NPTEL 3" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="n1.pdf" target="_blank" rel="noopener"><img src="n1.png" alt="NPTEL 1" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="n2.pdf" target="_blank" rel="noopener"><img src="n2.png" alt="NPTEL 2" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="n3.pdf" target="_blank" rel="noopener"><img src="n3.png" alt="NPTEL 3" onerror="this.classList.add('hide')"></a>
+            </div>
+            </div>
+        </div>
+
+        <!-- ===== Category: NVIDIA (1) – single ===== -->
+        <div class="category" data-target="nvidia">NVIDIA</div>
+        <div id="nvidia" class="cert-section">
+            <div class="single">
+            <a class="pair" href="nv1.pdf" target="_blank" rel="noopener">
+                <img src="nv1.png" alt="NVIDIA" onerror="this.classList.add('hide')">
+            </a>
+            </div>
+        </div>
+
+        <!-- ===== Category: ORACLE (1) – image + badge, no PDF provided by list ===== -->
+        <div class="category" data-target="oracle">ORACLE</div>
+        <div id="oracle" class="cert-section">
+            <div class="single">
+            <a class="pair" href="o1.png" target="_blank" rel="noopener">
+                <img src="o1.png" alt="Oracle" onerror="this.classList.add('hide')">
+                <img src="obadge1.png" alt="Oracle Badge" onerror="this.classList.add('hide')">
+            </a>
+            </div>
+        </div>
+    </main>
+
 
     <!-- Dock Navigation -->
     <div class="dock-panel">
@@ -440,25 +764,19 @@
             const dockItems = document.querySelectorAll('.dock-item');
             const pageSections = document.querySelectorAll('.page-section');
 
-            // Set initial active state
             document.querySelector('.dock-item[data-target="home-section"]')?.classList.add('active');
 
             dockItems.forEach(item => {
                 item.addEventListener('click', () => {
                     const targetId = item.getAttribute('data-target');
-                    if (!targetId) {
-                        // Optional: alert or log that this section is not yet built
-                        console.log(`The section for "${item.querySelector('.dock-label').textContent}" is under construction.`);
+                    if (!targetId || !document.getElementById(targetId)) {
+                        console.log(`The section for "${item.querySelector('.dock-label').textContent}" is under construction or does not exist.`);
                         return;
                     } 
 
-                    // Update active state on dock items
-                    dockItems.forEach(otherItem => {
-                        otherItem.classList.remove('active');
-                    });
+                    dockItems.forEach(otherItem => otherItem.classList.remove('active'));
                     item.classList.add('active');
                     
-                    // Show/Hide page sections
                     pageSections.forEach(section => {
                         if (section.id === targetId) {
                             section.classList.remove('hidden');
@@ -510,7 +828,7 @@
                 temp.style.position = "absolute";
                 temp.textContent = text;
                 document.body.appendChild(temp);
-                let newWidth = Math.max(300, temp.offsetWidth + 80); // base width + padding
+                let newWidth = Math.max(300, temp.offsetWidth + 80);
                 card.style.width = newWidth + "px";
                 document.body.removeChild(temp);
                 
@@ -525,16 +843,29 @@
                 }, 2000);
             }
             function cycle() {
-                // Only run the animation if the home section is visible
                 if (document.getElementById('home-section').classList.contains('hidden')) return;
                 showWord(roles[i % roles.length]);
                 i++;
             }
-            // Initial call and interval
             if (!document.getElementById('home-section').classList.contains('hidden')) {
                  cycle();
             }
             setInterval(cycle, 2600);
+            
+            // --- Certificate Accordion Logic ---
+            function toggleCertSection(el){
+              const box = document.getElementById(el.dataset.target);
+              if (!box) return;
+              const isOpen = box.style.maxHeight && box.style.maxHeight !== '0px';
+              if(!isOpen){
+                box.style.maxHeight = box.scrollHeight + 'px';
+              } else {
+                box.style.maxHeight = '0px';
+              }
+            }
+            document.querySelectorAll('.cert-section-container .category').forEach(cat=>{
+              cat.addEventListener('click', () => toggleCertSection(cat));
+            });
         });
     </script>
 
