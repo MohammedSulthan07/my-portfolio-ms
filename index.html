@@ -315,10 +315,7 @@
           align-items:center;
           gap:26px;
           padding:2px;
-          animation:marquee 20s linear infinite;
-        }
-        .cert-section-container .scroll-container:hover .track {
-          animation-play-state: paused;
+          animation:marquee 15s linear infinite;
         }
         @keyframes marquee{
           0%{ transform:translateX(0); }
@@ -889,6 +886,19 @@
               cat.addEventListener('click', () => toggleCertSection(cat));
             });
 
+            // --- Certificate Marquee Pause on Hover ---
+            document.querySelectorAll('.scroll-container').forEach(container => {
+                const track = container.querySelector('.track');
+                if (track) {
+                    container.addEventListener('mouseenter', () => {
+                        track.style.animationPlayState = 'paused';
+                    });
+                    container.addEventListener('mouseleave', () => {
+                        track.style.animationPlayState = 'running';
+                    });
+                }
+            });
+
             // --- Liquid Ether Background Effect Logic ---
             if (window.THREE) {
                 const backgroundEffectConfig = {
@@ -1289,5 +1299,4 @@
 
 </body>
 </html>
-
 
