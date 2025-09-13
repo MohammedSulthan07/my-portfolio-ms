@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mohammed Sulthan G - Portfolio</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Space Grotesk -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Three.js CDN for background effect -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <style>
+        /* --- Base and Layout Styles --- */
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #000;
+            color: #fff;
+            margin: 0;
+            padding: 2rem;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            min-height: 100vh;
+        }
+
+        /* --- Background Effect Container --- */
+        #liquid-ether-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Place it behind all content */
+            pointer-events: all; /* Allow mouse/touch events */
+        }
+
+        .page-section {
+            padding-bottom: 120px; /* space for dock */
+        }
+
+        .page-section.hidden {
+            display: none;
+        }
+
+        /* --- Custom UI Component Styles (from home.html) --- */
+        .ui-card {
+            background-color: #fff;
+            color: #000;
+            font-weight: 700;
+            border-radius: 1.5rem; /* 24px */
+            padding: 1rem 1.5rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+        }
+
+        /* --- Rotating Title Card ("I_AM_A") Styles (from home.html) --- */
+        .rotating-card-container {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem; /* 24px */
+        }
+        .rotating-card-container h1 {
+            font-size: 2.25rem; /* 36px */
+            margin: 0;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .rotating-card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 300px;
+            height: 70px;
+            padding: 0 1.5rem; /* 24px */
+            background: #fff;
+            color: #000;
+            border-radius: 1.5rem; /* 24px */
+            font-weight: 700;
+            font-size: 2rem; /* 32px */
+            position: relative;
+            overflow: hidden;
+            transition: width 0.4s ease;
+            white-space: nowrap;
+        }
+        .slot {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .word {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            opacity: 0;
+            transform: translateY(20px) scale(.95);
+        }
+        .word.in {
+            animation: enter 0.5s ease-out forwards;
+        }
+        .word.out {
+            animation: exit 0.5s ease-in forwards;
+        }
+        @keyframes enter {
+            from { opacity: 0; transform: translateY(20px) scale(.95); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes exit {
+            from { opacity: 1; transform: translateY(0) scale(1); }
+            to   { opacity: 0; transform: translateY(-20px) scale(.95); }
+        }
+
+        /* --- Content Card Styles (from About me.html) --- */
+        .content-card {
+            border: 2px solid #fff;
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            background-color: #000;
+        }
+
+        /* --- Custom List Styles (from About me.html) --- */
+        .custom-list li {
+            padding-left: 2rem;
+            position: relative;
+        }
+        .custom-list li::before {
+            content: '+';
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: #4f46e5; /* Indigo color */
+            font-size: 1.5rem;
+            font-weight: bold;
+            line-height: 1.5rem;
+        }
+
+        /* --- Dock Component Styles (Merged & Refined) --- */
+        .dock-panel {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: flex-end;
+            gap: 0.5rem;
+            border-radius: 1.5rem;
+            background-color: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid #333;
+            padding: 0.5rem;
+            z-index: 50;
+        }
+        .dock-item {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            cursor: pointer;
+            outline: none;
+            transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .dock-item:hover {
+            transform: translateY(-8px);
+        }
+        .dock-label {
+            position: absolute;
+            top: -2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            background-color: #333;
+            color: #fff;
+            font-size: 0.875rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+            pointer-events: none;
+        }
+        .dock-item:hover .dock-label {
+            opacity: 1;
+            visibility: visible;
+        }
+        .dock-icon-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 3.5rem;
+            height: 3.5rem;
+            background-color: transparent;
+            border-radius: 0.75rem;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .dock-item.active .dock-icon-wrapper {
+            background-color: #2a2a2a;
+        }
+        .dock-text-icon {
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        .dock-indicator {
+            width: 0.5rem;
+            height: 0.25rem;
+            background-color: transparent;
+            border-radius: 9999px;
+            margin-top: 0.5rem;
+            transition: background-color 0.3s ease-in-out;
+        }
+        .dock-item.active .dock-indicator {
+            background-color: #fff;
+        }
+
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            .photo-card {
+                grid-row: auto; /* Reset row span */
+                height: 300px;
+            }
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            .rotating-card-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            .rotating-card {
+                min-width: 280px;
+                font-size: 1.5rem;
+                height: 60px;
+            }
+            .dock-panel {
+                gap: 0.25rem;
+                bottom: 1rem;
+                padding: 0.25rem;
+            }
+            .dock-icon-wrapper {
+                width: 3rem;
+                height: 3rem;
+            }
+            .dock-label {
+                top: -2rem;
+                font-size: 0.75rem;
+            }
+        }
+        
+        /* --- Styles from certificates.html --- */
+        .cert-section-container {
+            --bg:#000;
+            --fg:#fff;
+            --card:#0b0b0b;
+            --border:#fff;
+        }
+        .cert-section-container .title{
+          display:inline-block;
+          margin:24px;
+          padding:14px 22px;
+          background:#fff;
+          color:#000;
+          font-weight:700;
+          font-size:38px;
+          border-radius:14px;
+          letter-spacing:1px;
+        }
+        .cert-section-container .category{
+          margin:12px 20px;
+          padding:22px;
+          text-align:center;
+          font-weight:700;
+          font-size:28px;
+          letter-spacing:1px;
+          background:#0a0a0a;
+          border:2px solid var(--border);
+          border-radius:18px;
+          cursor:pointer;
+          user-select:none;
+          transition:background .2s ease;
+        }
+        .cert-section-container .category:hover{ background:#111; }
+        .cert-section-container .cert-section{
+          margin:6px 20px 18px;
+          background:transparent;
+          border-radius:14px;
+          overflow:hidden;
+          max-height:0;
+          transition:max-height .5s ease;
+        }
+        .cert-section-container .scroll-container{
+          overflow:hidden;
+          white-space:nowrap;
+          padding:20px 0;
+        }
+        .cert-section-container .track{
+          display:inline-flex;
+          align-items:center;
+          gap:26px;
+          padding:2px;
+          animation:marquee 15s linear infinite;
+        }
+        @keyframes marquee{
+          0%{ transform:translateX(0); }
+          100%{ transform:translateX(-50%); }
+        }
+        @media (prefers-reduced-motion: reduce){
+          .cert-section-container .track{ animation:none; }
+        }
+        .cert-section-container .pair{
+          display:flex;
+          align-items:center;
+          gap:14px;
+          padding:12px 16px;
+          background:var(--card);
+          border:1px solid rgba(255,255,255,.15);
+          border-radius:12px;
+          box-shadow:0 6px 20px rgba(255,255,255,.08);
+          flex-shrink: 0; /* Prevents the card from shrinking */
+        }
+        .cert-section-container .pair img{
+          height:180px;
+          width:auto;
+          border-radius:10px;
+          display:block;
+          box-shadow:0 4px 12px rgba(255,255,255,.18);
+          transition:transform .25s ease;
+          object-fit: contain; /* Ensures aspect ratio is maintained */
+          background-color: #1a1a1a; /* Adds a background for loading/error states */
+        }
+        .cert-section-container .pair img:hover{ transform:scale(1.04); }
+        .cert-section-container .single{
+          display:flex;
+          justify-content:center;
+          padding:24px 10px 28px;
+        }
+        .cert-section-container .single .pair img{ height:220px; }
+        .cert-section-container img[onerror]{ background:#111; }
+        .cert-section-container .hide{ display:none !important; }
+
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Container for the background effect -->
+    <div id="liquid-ether-background"></div>
+
+    <!-- HOME SECTION -->
+    <main id="home-section" class="page-section">
+        <div class="main-grid container mx-auto p-8 lg:p-16 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
+            <!-- Left Column -->
+            <div class="flex flex-col gap-8">
+                <!-- HOME Card -->
+                <div class="ui-card text-4xl">
+                    HOME
+                </div>
+                <!-- Name / Translation Card -->
+                <div id="translation-card" class="bg-white text-black p-6 rounded-3xl flex items-center justify-between transition-all duration-300 transform scale-100 shadow-xl">
+                    <div id="text-container" class="flex flex-col">
+                        <h2 id="greeting" class="text-sm font-normal uppercase transition-opacity duration-300">HELLO, I'M</h2>
+                        <h1 id="name" class="text-4xl sm:text-5xl font-bold mt-1 transition-opacity duration-300">MOHAMMED SULTHAN G</h1>
+                    </div>
+                    <button id="translate-button" class="flex-shrink-0 w-12 h-12 rounded-full bg-black text-white flex items-center justify-center cursor-pointer transform transition-transform duration-300 hover:rotate-180">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path>
+                        </svg>
+                    </button>
+                </div>
+                <!-- Rotating Title Card -->
+                <div class="rotating-card-container">
+                    <h1>I_AM_A</h1>
+                    <div class="rotating-card" id="rotating-card">
+                        <div class="slot" id="slot"></div>
+                    </div>
+                </div>
+                <!-- RESUME Card -->
+                <a href="resume.pdf" download class="ui-card text-3xl gap-4">
+                    RESUME
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                </a>
+            </div>
+            <!-- Right Column (PHOTO Card) -->
+            <div class="photo-card w-full h-full min-h-[400px] lg:row-span-3 bg-white text-black rounded-3xl flex items-center justify-center">
+                 <span class="text-5xl font-bold">PHOTO</span>
+            </div>
+        </div>
+    </main>
+    
+    <!-- ABOUT ME SECTION -->
+    <main id="about-section" class="page-section hidden">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+            <!-- Column 1 -->
+            <div class="md:col-span-4 space-y-8">
+                <div class="content-card">
+                     <h1 class="text-4xl font-bold tracking-widest mb-2">ABOUT ME</h1>
+                </div>
+                <div class="content-card">
+                    <h2 class="text-3xl font-bold tracking-wider mb-4">WHAT I DO</h2>
+                    <hr class="border-white mb-6">
+                    <ul class="space-y-4 custom-list">
+                        <li>DEVELOP APPS, GAMES, AND WEB PROJECTS THAT COMBINE FUNCTIONALITY WITH SIMPLICITY.</li>
+                        <li>WORK ON AI, MACHINE LEARNING, AND INNOVATIVE PROBLEM-SOLVING PROJECTS.</li>
+                        <li>CONSTANTLY LEARN AND SHARE KNOWLEDGE THROUGH HANDS-ON PRACTICE.</li>
+                    </ul>
+                </div>
+                 <a href="resume.pdf" download class="content-card flex items-center justify-between">
+                    <h2 class="text-4xl font-bold tracking-widest">RESUME</h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+                </a>
+            </div>
+
+            <!-- Column 2 -->
+            <div class="md:col-span-5 space-y-8">
+                <div class="content-card">
+                    <p class="text-lg leading-relaxed">
+                        <span class="font-bold">HI, I'M MOHAMMED SULTHAN G</span><br><br>
+                        I'M PASSIONATE ABOUT TECHNOLOGY, CREATIVITY, AND PROBLEM-SOLVING. MY JOURNEY STARTED WITH A CURIOSITY TO UNDERSTAND HOW THINGS WORK, WHICH NATURALLY GREW INTO LEARNING PROGRAMMING, BUILDING PROJECTS, AND EXPLORING REAL-WORLD APPLICATIONS OF TECH.
+                    </p>
+                </div>
+                 <div class="content-card">
+                    <h2 class="text-3xl font-bold tracking-wider mb-4">INTERESTS</h2>
+                    <hr class="border-white mb-6">
+                    <ul class="space-y-4 custom-list">
+                        <li>EXPLORING NEW TECHNOLOGIES AND FRAMEWORKS.</li>
+                        <li>CREATING USER-FRIENDLY APPS & WEBSITES.</li>
+                        <li>ARTIFICIAL INTELLIGENCE, DEEP LEARNING, AND DATA SCIENCE.</li>
+                        <li>COMMUNITY LEARNING.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Column 3 -->
+            <div class="md:col-span-3">
+                 <div class="content-card h-full flex items-center justify-center">
+                    <span class="text-4xl font-bold tracking-widest">PHOTO</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- CONTACT SECTION -->
+    <main id="contact-section" class="page-section hidden flex flex-col items-center justify-center min-h-screen p-5">
+        <div class="relative w-full max-w-6xl p-10 rounded-2xl space-y-14">
+            <!-- Contact Title -->
+            <div class="flex items-center space-x-4">
+                <div class="bg-white text-black text-5xl font-extrabold py-3 px-10 rounded-2xl">CONTACT</div>
+            </div>
+
+            <!-- Social Links Container -->
+            <div class="flex flex-col md:flex-row justify-center items-center md:space-x-12 space-y-8 md:space-y-0">
+
+                <!-- Email Card -->
+                <div class="bg-black border border-gray-700 rounded-2xl flex flex-col items-center justify-center p-8 w-72 h-72 space-y-5">
+                    <img src="email.png" alt="Email Icon" class="w-20 h-20 rounded-full object-cover">
+                    <img src="emailtext.png" alt="Email Text" class="w-40 h-8 mt-2">
+                    <p class="text-xs text-gray-400">MSULTHAN139@GMAIL.COM</p>
+                </div>
+
+                <!-- LinkedIn Card -->
+                <div class="bg-black border border-gray-700 rounded-2xl flex flex-col items-center justify-center p-8 w-72 h-72 space-y-5">
+                    <img src="linkedin.png" alt="LinkedIn Icon" class="w-20 h-20 rounded-full object-cover">
+                    <img src="linkedintext.png" alt="LinkedIn Text" class="w-40 h-8 mt-2">
+                    <a href="https://www.linkedin.com/in/mohammed-sulthan-b64b17308?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" target="_blank" class="px-6 py-2 rounded-full text-sm font-semibold border-2 border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition-colors duration-300">CLICK TO VIEW</a>
+                </div>
+
+                <!-- GitHub Card -->
+                <div class="bg-black border border-gray-700 rounded-2xl flex flex-col items-center justify-center p-8 w-72 h-72 space-y-5">
+                    <img src="github.png" alt="GitHub Icon" class="w-20 h-20 rounded-full object-cover">
+                    <img src="githubtext.png" alt="GitHub Text" class="w-40 h-8 mt-2">
+                    <a href="https://github.com/MohammedSulthan07" target="_blank" class="px-6 py-2 rounded-full text-sm font-semibold border-2 border-white text-white hover:bg-white hover:text-black transition-colors duration-300">CLICK TO VIEW</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- CERTIFICATES SECTION -->
+    <main id="certifications-section" class="page-section hidden cert-section-container">
+        <div class="title">CERTIFICATES</div>
+
+        <!-- ===== Category: CISCO (5) – cert + badge ===== -->
+        <div class="category" data-target="cisco">CISCO</div>
+        <div id="cisco" class="cert-section">
+            <div class="scroll-container">
+            <div class="track">
+                <!-- set A -->
+                <a class="pair" href="c1.pdf" target="_blank" rel="noopener">
+                <img src="c1.png" alt="Cisco 1" onerror="this.classList.add('hide')">
+                <img src="cbadge1.png" alt="Cisco 1 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="c2.pdf" target="_blank" rel="noopener">
+                <img src="c2.png" alt="Cisco 2" onerror="this.classList.add('hide')">
+                <img src="cbadge2.png" alt="Cisco 2 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="c3.pdf" target="_blank" rel="noopener">
+                <img src="c3.png" alt="Cisco 3" onerror="this.classList.add('hide')">
+                <img src="cbadge3.png" alt="Cisco 3 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="c4.pdf" target="_blank" rel="noopener">
+                <img src="c4.png" alt="Cisco 4" onerror="this.classList.add('hide')">
+                <img src="cbadge4.png" alt="Cisco 4 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="c5.pdf" target="_blank" rel="noopener">
+                <img src="c5.png" alt="Cisco 5" onerror="this.classList.add('hide')">
+                <img src="cbadge5.png" alt="Cisco 5 Badge" onerror="this.classList.add('hide')">
+                </a>
+
+                <!-- set B (duplicate for seamless loop) -->
+                <a class="pair" href="c1.pdf" target="_blank" rel="noopener">
+                <img src="c1.png" alt="Cisco 1" onerror="this.classList.add('hide')">
+                <img src="cbadge1.png" alt="Cisco 1 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="c2.pdf" target="_blank" rel="noopener">
+                <img src="c2.png" alt="Cisco 2" onerror="this.classList.add('hide')">
+                <img src="cbadge2.png" alt="Cisco 2 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="c3.pdf" target="_blank" rel="noopener">
+                <img src="c3.png" alt="Cisco 3" onerror="this.classList.add('hide')">
+                <img src="cbadge3.png" alt="Cisco 3 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="c4.pdf" target="_blank" rel="noopener">
+                <img src="c4.png" alt="Cisco 4" onerror="this.classList.add('hide')">
+                <img src="cbadge4.png" alt="Cisco 4 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="c5.pdf" target="_blank" rel="noopener">
+                <img src="c5.png" alt="Cisco 5" onerror="this.classList.add('hide')">
+                <img src="cbadge5.png" alt="Cisco 5 Badge" onerror="this.classList.add('hide')">
+                </a>
+            </div>
+            </div>
+        </div>
+
+        <!-- ===== Category: COURSERA (3) – cert + badge ===== -->
+        <div class="category" data-target="coursera">COURSERA</div>
+        <div id="coursera" class="cert-section">
+            <div class="scroll-container">
+            <div class="track">
+                <!-- set A -->
+                <a class="pair" href="co1.pdf" target="_blank" rel="noopener">
+                <img src="co1.png" alt="Coursera 1" onerror="this.classList.add('hide')">
+                <img src="cobadge1.png" alt="Coursera 1 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="co2.pdf" target="_blank" rel="noopener">
+                <img src="co2.png" alt="Coursera 2" onerror="this.classList.add('hide')">
+                <img src="cobadge2.png" alt="Coursera 2 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="co3.pdf" target="_blank" rel="noopener">
+                <img src="co3.png" alt="Coursera 3" onerror="this.classList.add('hide')">
+                <img src="cobadge3.png" alt="Coursera 3 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <!-- set B -->
+                <a class="pair" href="co1.pdf" target="_blank" rel="noopener">
+                <img src="co1.png" alt="Coursera 1" onerror="this.classList.add('hide')">
+                <img src="cobadge1.png" alt="Coursera 1 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="co2.pdf" target="_blank" rel="noopener">
+                <img src="co2.png" alt="Coursera 2" onerror="this.classList.add('hide')">
+                <img src="cobadge2.png" alt="Coursera 2 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="co3.pdf" target="_blank" rel="noopener">
+                <img src="co3.png" alt="Coursera 3" onerror="this.classList.add('hide')">
+                <img src="cobadge3.png" alt="Coursera 3 Badge" onerror="this.classList.add('hide')">
+                </a>
+            </div>
+            </div>
+        </div>
+
+        <!-- ===== Category: HACKER RANK (6) ===== -->
+        <div class="category" data-target="hackerrank">HACKER RANK</div>
+        <div id="hackerrank" class="cert-section">
+            <div class="scroll-container">
+            <div class="track">
+                <!-- A + B -->
+                <!-- A -->
+                <a class="pair" href="h1.pdf" target="_blank" rel="noopener"><img src="h1.png" alt="HackerRank 1" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="h2.pdf" target="_blank" rel="noopener"><img src="h2.png" alt="HackerRank 2" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="h3.pdf" target="_blank" rel="noopener"><img src="h3.png" alt="HackerRank 3" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="h4.pdf" target="_blank" rel="noopener"><img src="h4.png" alt="HackerRank 4" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="h5.pdf" target="_blank" rel="noopener"><img src="h5.png" alt="HackerRank 5" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="h6.pdf" target="_blank" rel="noopener"><img src="h6.png" alt="HackerRank 6" onerror="this.classList.add('hide')"></a>
+                <!-- B -->
+                <a class="pair" href="h1.pdf" target="_blank" rel="noopener"><img src="h1.png" alt="HackerRank 1" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="h2.pdf" target="_blank" rel="noopener"><img src="h2.png" alt="HackerRank 2" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="h3.pdf" target="_blank" rel="noopener"><img src="h3.png" alt="HackerRank 3" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="h4.pdf" target="_blank" rel="noopener"><img src="h4.png" alt="HackerRank 4" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="h5.pdf" target="_blank" rel="noopener"><img src="h5.png" alt="HackerRank 5" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="h6.pdf" target="_blank" rel="noopener"><img src="h6.png" alt="HackerRank 6" onerror="this.classList.add('hide')"></a>
+            </div>
+            </div>
+        </div>
+
+        <!-- ===== Category: HAYAKAWA (1) – single ===== -->
+        <div class="category" data-target="hayakawa">HAYAKAWA (JAPANESE)</div>
+        <div id="hayakawa" class="cert-section">
+            <div class="single">
+            <a class="pair" href="ha1.pdf" target="_blank" rel="noopener">
+                <img src="ha1.png" alt="Hayakawa" onerror="this.classList.add('hide')">
+            </a>
+            </div>
+        </div>
+
+        <!-- ===== Category: IBM (2) – cert + badge ===== -->
+        <div class="category" data-target="ibm">IBM</div>
+        <div id="ibm" class="cert-section">
+            <div class="scroll-container">
+            <div class="track">
+                <!-- A -->
+                <a class="pair" href="ibm1.pdf" target="_blank" rel="noopener">
+                <img src="ibm1.png" alt="IBM 1" onerror="this.classList.add('hide')">
+                <img src="ibmbadge1.png" alt="IBM 1 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="ibm2.pdf" target="_blank" rel="noopener">
+                <img src="ibm2.png" alt="IBM 2" onerror="this.classList.add('hide')">
+                <img src="ibmbadge2.png" alt="IBM 2 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <!-- B -->
+                <a class="pair" href="ibm1.pdf" target="_blank" rel="noopener">
+                <img src="ibm1.png" alt="IBM 1" onerror="this.classList.add('hide')">
+                <img src="ibmbadge1.png" alt="IBM 1 Badge" onerror="this.classList.add('hide')">
+                </a>
+                <a class="pair" href="ibm2.pdf" target="_blank" rel="noopener">
+                <img src="ibm2.png" alt="IBM 2" onerror="this.classList.add('hide')">
+                <img src="ibmbadge2.png" alt="IBM 2 Badge" onerror="this.classList.add('hide')">
+                </a>
+            </div>
+            </div>
+        </div>
+
+        <!-- ===== Category: INFOSYS (19) ===== -->
+        <div class="category" data-target="infosys">INFOSYS</div>
+        <div id="infosys" class="cert-section">
+            <div class="scroll-container">
+            <div class="track">
+                <a class="pair" href="i1.pdf" target="_blank" rel="noopener"><img src="i1.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i2.pdf" target="_blank" rel="noopener"><img src="i2.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i3.pdf" target="_blank" rel="noopener"><img src="i3.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i4.pdf" target="_blank" rel="noopener"><img src="i4.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i5.pdf" target="_blank" rel="noopener"><img src="i5.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i6.pdf" target="_blank" rel="noopener"><img src="i6.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i7.pdf" target="_blank" rel="noopener"><img src="i7.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i8.pdf" target="_blank" rel="noopener"><img src="i8.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i9.pdf" target="_blank" rel="noopener"><img src="i9.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i10.pdf" target="_blank" rel="noopener"><img src="i10.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i11.pdf" target="_blank" rel="noopener"><img src="i11.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i12.pdf" target="_blank" rel="noopener"><img src="i12.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i13.pdf" target="_blank" rel="noopener"><img src="i13.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i14.pdf" target="_blank" rel="noopener"><img src="i14.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i15.pdf" target="_blank" rel="noopener"><img src="i15.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i16.pdf" target="_blank" rel="noopener"><img src="i16.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i17.pdf" target="_blank" rel="noopener"><img src="i17.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i18.pdf" target="_blank" rel="noopener"><img src="i18.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i19.pdf" target="_blank" rel="noopener"><img src="i19.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i1.pdf" target="_blank" rel="noopener"><img src="i1.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i2.pdf" target="_blank" rel="noopener"><img src="i2.png" alt="" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="i3.pdf" target="_blank" rel="noopener"><img src="i3.png" alt="" onerror="this.classList.add('hide')"></a>
+            </div>
+            </div>
+        </div>
+
+        <!-- ===== Category: MONGO DB (1) – cert + badge but single ===== -->
+        <div class="category" data-target="mongodb">MONGO DB</div>
+        <div id="mongodb" class="cert-section">
+            <div class="single">
+            <a class="pair" href="m1.pdf" target="_blank" rel="noopener">
+                <img src="m1.png" alt="MongoDB" onerror="this.classList.add('hide')">
+                <img src="mbadge1.png" alt="MongoDB Badge" onerror="this.classList.add('hide')">
+            </a>
+            </div>
+        </div>
+
+        <!-- ===== Category: NPTEL (3) ===== -->
+        <div class="category" data-target="nptel">NPTEL</div>
+        <div id="nptel" class="cert-section">
+            <div class="scroll-container">
+            <div class="track">
+                <a class="pair" href="n1.pdf" target="_blank" rel="noopener"><img src="n1.png" alt="NPTEL 1" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="n2.pdf" target="_blank" rel="noopener"><img src="n2.png" alt="NPTEL 2" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="n3.pdf" target="_blank" rel="noopener"><img src="n3.png" alt="NPTEL 3" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="n1.pdf" target="_blank" rel="noopener"><img src="n1.png" alt="NPTEL 1" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="n2.pdf" target="_blank" rel="noopener"><img src="n2.png" alt="NPTEL 2" onerror="this.classList.add('hide')"></a>
+                <a class="pair" href="n3.pdf" target="_blank" rel="noopener"><img src="n3.png" alt="NPTEL 3" onerror="this.classList.add('hide')"></a>
+            </div>
+            </div>
+        </div>
+
+        <!-- ===== Category: NVIDIA (1) – single ===== -->
+        <div class="category" data-target="nvidia">NVIDIA</div>
+        <div id="nvidia" class="cert-section">
+            <div class="single">
+            <a class="pair" href="nv1.pdf" target="_blank" rel="noopener">
+                <img src="nv1.png" alt="NVIDIA" onerror="this.classList.add('hide')">
+            </a>
+            </div>
+        </div>
+
+        <!-- ===== Category: ORACLE (1) – image + badge, no PDF provided by list ===== -->
+        <div class="category" data-target="oracle">ORACLE</div>
+        <div id="oracle" class="cert-section">
+            <div class="single">
+            <a class="pair" href="o1.png" target="_blank" rel="noopener">
+                <img src="o1.png" alt="Oracle" onerror="this.classList.add('hide')">
+                <img src="obadge1.png" alt="Oracle Badge" onerror="this.classList.add('hide')">
+            </a>
+            </div>
+        </div>
+    </main>
+
+
+    <!-- Dock Navigation -->
+    <div class="dock-panel">
+        <div class="dock-item active" data-target="home-section">
+            <span class="dock-label">Home</span>
+            <div class="dock-icon-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
+            <div class="dock-indicator"></div>
+        </div>
+        <div class="dock-item" data-target="about-section">
+            <span class="dock-label">About Me</span>
+            <div class="dock-icon-wrapper">
+                <span class="dock-text-icon">me</span>
+            </div>
+            <div class="dock-indicator"></div>
+        </div>
+        <div class="dock-item" data-target="skills-section">
+            <span class="dock-label">Skills</span>
+            <div class="dock-icon-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
+            </div>
+            <div class="dock-indicator"></div>
+        </div>
+        <div class="dock-item" data-target="projects-section">
+            <span class="dock-label">Projects</span>
+            <div class="dock-icon-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1.3.5 2.6 1.5 3.5.8.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+            </div>
+            <div class="dock-indicator"></div>
+        </div>
+        <div class="dock-item" data-target="experience-section">
+            <span class="dock-label">Experience</span>
+            <div class="dock-icon-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m18 10-5 5-4-4-3 3"/></svg>
+            </div>
+            <div class="dock-indicator"></div>
+        </div>
+        <div class="dock-item" data-target="certifications-section">
+            <span class="dock-label">Certifications</span>
+            <div class="dock-icon-wrapper">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 1v17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V1"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M12 16H8"/></svg>
+            </div>
+            <div class="dock-indicator"></div>
+        </div>
+        <div class="dock-item" data-target="contact-section">
+            <span class="dock-label">Contact</span>
+            <div class="dock-icon-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div class="dock-indicator"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Dock and Page Switching Logic ---
+            const dockItems = document.querySelectorAll('.dock-item');
+            const pageSections = document.querySelectorAll('.page-section');
+
+            document.querySelector('.dock-item[data-target="home-section"]')?.classList.add('active');
+
+            dockItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const targetId = item.getAttribute('data-target');
+                    if (!targetId || !document.getElementById(targetId)) {
+                        console.log(`The section for "${item.querySelector('.dock-label').textContent}" is under construction or does not exist.`);
+                        return;
+                    } 
+
+                    dockItems.forEach(otherItem => otherItem.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    pageSections.forEach(section => {
+                        if (section.id === targetId) {
+                            section.classList.remove('hidden');
+                        } else {
+                            section.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+
+            // --- Translation Card Logic (from home.html) ---
+            const translateButton = document.getElementById('translate-button');
+            const greetingElement = document.getElementById('greeting');
+            const nameElement = document.getElementById('name');
+            let isEnglish = true;
+            const translations = {
+                english: { greeting: "HELLO, I'M", name: "MOHAMMED SULTHAN G" },
+                japanese: { greeting: "こんにちは, わたしは", name: "モハメド・スルタン" }
+            };
+            translateButton.addEventListener('click', () => {
+                const nextLang = isEnglish ? 'japanese' : 'english';
+                greetingElement.style.opacity = '0';
+                nameElement.style.opacity = '0';
+                setTimeout(() => {
+                    greetingElement.textContent = translations[nextLang].greeting;
+                    nameElement.textContent = translations[nextLang].name;
+                    greetingElement.style.opacity = '1';
+                    nameElement.style.opacity = '1';
+                    isEnglish = !isEnglish;
+                }, 300);
+            });
+
+            // --- Rotating Title Card Logic (from home.html) ---
+            const roles = ["Developer", "UI/UX Designer", "Engineer", "Problem Solver", "Creator", "Open-Source Contributor"];
+            const slot = document.getElementById("slot");
+            const card = document.getElementById("rotating-card");
+            let i = 0;
+            function showWord(text) {
+                const el = document.createElement("div");
+                el.className = "word";
+                el.textContent = text;
+                slot.appendChild(el);
+
+                const temp = document.createElement("span");
+                temp.style.fontSize = getComputedStyle(card).fontSize;
+                temp.style.fontWeight = getComputedStyle(card).fontWeight;
+                temp.style.fontFamily = getComputedStyle(card).fontFamily;
+                temp.style.visibility = "hidden";
+                temp.style.position = "absolute";
+                temp.textContent = text;
+                document.body.appendChild(temp);
+                let newWidth = Math.max(300, temp.offsetWidth + 80);
+                card.style.width = newWidth + "px";
+                document.body.removeChild(temp);
+                
+                requestAnimationFrame(() => el.classList.add("in"));
+                
+                setTimeout(() => {
+                    el.classList.remove("in");
+                    el.classList.add("out");
+                    el.addEventListener("animationend", () => {
+                        if (el.classList.contains("out")) el.remove();
+                    }, { once: true });
+                }, 2000);
+            }
+            function cycle() {
+                if (document.getElementById('home-section').classList.contains('hidden')) return;
+                showWord(roles[i % roles.length]);
+                i++;
+            }
+            if (!document.getElementById('home-section').classList.contains('hidden')) {
+                 cycle();
+            }
+            setInterval(cycle, 2600);
+            
+            // --- Certificate Accordion Logic ---
+            function toggleCertSection(el){
+              const box = document.getElementById(el.dataset.target);
+              if (!box) return;
+              const isOpen = box.style.maxHeight && box.style.maxHeight !== '0px';
+              if(!isOpen){
+                box.style.maxHeight = box.scrollHeight + 'px';
+              } else {
+                box.style.maxHeight = '0px';
+              }
+            }
+            document.querySelectorAll('.cert-section-container .category').forEach(cat=>{
+              cat.addEventListener('click', () => toggleCertSection(cat));
+            });
+
+            // --- Certificate Marquee Pause on Hover ---
+            document.querySelectorAll('.scroll-container').forEach(container => {
+                const track = container.querySelector('.track');
+                if (track) {
+                    container.addEventListener('mouseenter', () => {
+                        track.style.animationPlayState = 'paused';
+                    });
+                    container.addEventListener('mouseleave', () => {
+                        track.style.animationPlayState = 'running';
+                    });
+                }
+            });
+
+            // --- Liquid Ether Background Effect Logic ---
+            if (window.THREE) {
+                const backgroundEffectConfig = {
+                    mouseForce: 20,
+                    cursorSize: 100,
+                    isViscous: false,
+                    viscous: 30,
+                    iterationsViscous: 32,
+                    iterationsPoisson: 32,
+                    dt: 0.014,
+                    BFECC: true,
+                    resolution: 0.5,
+                    isBounce: false,
+                    colors: ['#5227FF', '#FF9FFC', '#B19EEF'],
+                    autoDemo: true,
+                    autoSpeed: 0.5,
+                    autoIntensity: 2.2,
+                    takeoverDuration: 0.25,
+                    autoResumeDelay: 1000,
+                    autoRampDuration: 0.6
+                };
+                initLiquidEther(backgroundEffectConfig);
+            } else {
+                console.error("Three.js is not loaded. Background effect cannot be initialized.");
+            }
+        });
+
+        function initLiquidEther(config) {
+            const mountRef = document.getElementById('liquid-ether-background');
+            if (!mountRef) return;
+            
+            let rafRef = null;
+            let isVisible = true;
+
+            function makePaletteTexture(stops) {
+                let arr;
+                if (Array.isArray(stops) && stops.length > 0) {
+                    if (stops.length === 1) {
+                        arr = [stops[0], stops[0]];
+                    } else {
+                        arr = stops;
+                    }
+                } else {
+                    arr = ['#ffffff', '#ffffff'];
+                }
+                const w = arr.length;
+                const data = new Uint8Array(w * 4);
+                for (let i = 0; i < w; i++) {
+                    const c = new THREE.Color(arr[i]);
+                    data[i * 4 + 0] = Math.round(c.r * 255);
+                    data[i * 4 + 1] = Math.round(c.g * 255);
+                    data[i * 4 + 2] = Math.round(c.b * 255);
+                    data[i * 4 + 3] = 255;
+                }
+                const tex = new THREE.DataTexture(data, w, 1, THREE.RGBAFormat);
+                tex.magFilter = THREE.LinearFilter;
+                tex.minFilter = THREE.LinearFilter;
+                tex.wrapS = THREE.ClampToEdgeWrapping;
+                tex.wrapT = THREE.ClampToEdgeWrapping;
+                tex.generateMipmaps = false;
+                tex.needsUpdate = true;
+                return tex;
+            }
+
+            const paletteTex = makePaletteTexture(config.colors);
+            const bgVec4 = new THREE.Vector4(0, 0, 0, 0);
+
+            class CommonClass {
+                constructor() {
+                    this.width = 0;
+                    this.height = 0;
+                    this.aspect = 1;
+                    this.pixelRatio = 1;
+                    this.time = 0;
+                    this.delta = 0;
+                    this.container = null;
+                    this.renderer = null;
+                    this.clock = null;
+                }
+                init(container) {
+                    this.container = container;
+                    this.pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+                    this.resize();
+                    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                    this.renderer.autoClear = false;
+                    this.renderer.setClearColor(new THREE.Color(0x000000), 0);
+                    this.renderer.setPixelRatio(this.pixelRatio);
+                    this.renderer.setSize(this.width, this.height);
+                    this.renderer.domElement.style.width = '100%';
+                    this.renderer.domElement.style.height = '100%';
+                    this.renderer.domElement.style.display = 'block';
+                    this.clock = new THREE.Clock();
+                    this.clock.start();
+                }
+                resize() {
+                    if (!this.container) return;
+                    const rect = this.container.getBoundingClientRect();
+                    this.width = Math.max(1, Math.floor(rect.width));
+                    this.height = Math.max(1, Math.floor(rect.height));
+                    this.aspect = this.width / this.height;
+                    if (this.renderer) this.renderer.setSize(this.width, this.height, false);
+                }
+                update() {
+                    this.delta = this.clock.getDelta();
+                    this.time += this.delta;
+                }
+            }
+            const Common = new CommonClass();
+
+            class MouseClass {
+                constructor() {
+                    this.mouseMoved = false;
+                    this.coords = new THREE.Vector2();
+                    this.coords_old = new THREE.Vector2();
+                    this.diff = new THREE.Vector2();
+                    this.timer = null;
+                    this.container = null;
+                    this._onMouseMove = this.onDocumentMouseMove.bind(this);
+                    this._onTouchStart = this.onDocumentTouchStart.bind(this);
+                    this._onTouchMove = this.onDocumentTouchMove.bind(this);
+                    this._onMouseEnter = this.onMouseEnter.bind(this);
+                    this._onMouseLeave = this.onMouseLeave.bind(this);
+                    this._onTouchEnd = this.onTouchEnd.bind(this);
+                    this.isHoverInside = false;
+                    this.hasUserControl = false;
+                    this.isAutoActive = false;
+                    this.autoIntensity = 2.0;
+                    this.takeoverActive = false;
+                    this.takeoverStartTime = 0;
+                    this.takeoverDuration = 0.25;
+                    this.takeoverFrom = new THREE.Vector2();
+                    this.takeoverTo = new THREE.Vector2();
+                    this.onInteract = null;
+                }
+                init(container) {
+                    this.container = container;
+                    // We attach to the body to capture movement anywhere on the page
+                    document.body.addEventListener('mousemove', this._onMouseMove, false);
+                    document.body.addEventListener('touchstart', this._onTouchStart, { passive: false });
+                    document.body.addEventListener('touchmove', this._onTouchMove, { passive: false });
+                    document.body.addEventListener('touchend', this._onTouchEnd, false);
+                    container.addEventListener('mouseenter', this._onMouseEnter, false);
+                    container.addEventListener('mouseleave', this._onMouseLeave, false);
+                }
+                dispose() {
+                    if (!this.container) return;
+                    document.body.removeEventListener('mousemove', this._onMouseMove, false);
+                    document.body.removeEventListener('touchstart', this._onTouchStart, false);
+                    document.body.removeEventListener('touchmove', this._onTouchMove, false);
+                    document.body.removeEventListener('touchend', this._onTouchEnd, false);
+                    this.container.removeEventListener('mouseenter', this._onMouseEnter, false);
+                    this.container.removeEventListener('mouseleave', this._onMouseLeave, false);
+                }
+                setCoords(x, y) {
+                    if (!this.container) return;
+                    if (this.timer) clearTimeout(this.timer);
+                    const rect = this.container.getBoundingClientRect();
+                    const nx = (x - rect.left) / rect.width;
+                    const ny = (y - rect.top) / rect.height;
+                    this.coords.set(nx * 2 - 1, -(ny * 2 - 1));
+                    this.mouseMoved = true;
+                    this.timer = setTimeout(() => {
+                        this.mouseMoved = false;
+                    }, 100);
+                }
+                setNormalized(nx, ny) {
+                    this.coords.set(nx, ny);
+                    this.mouseMoved = true;
+                }
+                onDocumentMouseMove(event) {
+                    if (this.onInteract) this.onInteract();
+                    if (this.isAutoActive && !this.hasUserControl && !this.takeoverActive) {
+                        const rect = this.container.getBoundingClientRect();
+                        const nx = (event.clientX - rect.left) / rect.width;
+                        const ny = (event.clientY - rect.top) / rect.height;
+                        this.takeoverFrom.copy(this.coords);
+                        this.takeoverTo.set(nx * 2 - 1, -(ny * 2 - 1));
+                        this.takeoverStartTime = performance.now();
+                        this.takeoverActive = true;
+                        this.hasUserControl = true;
+                        this.isAutoActive = false;
+                        return;
+                    }
+                    this.setCoords(event.clientX, event.clientY);
+                    this.hasUserControl = true;
+                }
+                onDocumentTouchStart(event) {
+                    if (event.touches.length === 1) {
+                        const t = event.touches[0];
+                        if (this.onInteract) this.onInteract();
+                        this.setCoords(t.pageX, t.pageY);
+                        this.hasUserControl = true;
+                        this.isHoverInside = true;
+                    }
+                }
+                onDocumentTouchMove(event) {
+                    if (event.touches.length === 1) {
+                        const t = event.touches[0];
+                        if (this.onInteract) this.onInteract();
+                        this.setCoords(t.pageX, t.pageY);
+                    }
+                }
+                onTouchEnd() {
+                    this.isHoverInside = false;
+                }
+                onMouseEnter() {
+                    this.isHoverInside = true;
+                }
+                onMouseLeave() {
+                    this.isHoverInside = false;
+                }
+                update() {
+                    if (this.takeoverActive) {
+                        const t = (performance.now() - this.takeoverStartTime) / (this.takeoverDuration * 1000);
+                        if (t >= 1) {
+                            this.takeoverActive = false;
+                            this.coords.copy(this.takeoverTo);
+                            this.coords_old.copy(this.coords);
+                            this.diff.set(0, 0);
+                        } else {
+                            const k = t * t * (3 - 2 * t);
+                            this.coords.copy(this.takeoverFrom).lerp(this.takeoverTo, k);
+                        }
+                    }
+                    this.diff.subVectors(this.coords, this.coords_old);
+                    this.coords_old.copy(this.coords);
+                    if (this.coords_old.x === 0 && this.coords_old.y === 0) this.diff.set(0, 0);
+                    if (this.isAutoActive && !this.takeoverActive) this.diff.multiplyScalar(this.autoIntensity);
+                }
+            }
+            const Mouse = new MouseClass();
+
+            class AutoDriver {
+                constructor(mouse, manager, opts) {
+                    this.mouse = mouse;
+                    this.manager = manager;
+                    this.enabled = opts.enabled;
+                    this.speed = opts.speed; // normalized units/sec
+                    this.resumeDelay = opts.resumeDelay || 3000; // ms
+                    this.rampDurationMs = (opts.rampDuration || 0) * 1000;
+                    this.active = false;
+                    this.current = new THREE.Vector2(0, 0);
+                    this.target = new THREE.Vector2();
+                    this.lastTime = performance.now();
+                    this.activationTime = 0;
+                    this.margin = 0.2;
+                    this._tmpDir = new THREE.Vector2();
+                    this.pickNewTarget();
+                }
+                pickNewTarget() {
+                    const r = Math.random;
+                    this.target.set((r() * 2 - 1) * (1 - this.margin), (r() * 2 - 1) * (1 - this.margin));
+                }
+                forceStop() {
+                    this.active = false;
+                    this.mouse.isAutoActive = false;
+                }
+                update() {
+                    if (!this.enabled) return;
+                    const now = performance.now();
+                    const idle = now - this.manager.lastUserInteraction;
+                    if (idle < this.resumeDelay) {
+                        if (this.active) this.forceStop();
+                        return;
+                    }
+                    if (this.mouse.isHoverInside) {
+                        if (this.active) this.forceStop();
+                        return;
+                    }
+                    if (!this.active) {
+                        this.active = true;
+                        this.current.copy(this.mouse.coords);
+                        this.lastTime = now;
+                        this.activationTime = now;
+                    }
+                    if (!this.active) return;
+                    this.mouse.isAutoActive = true;
+                    let dtSec = (now - this.lastTime) / 1000;
+                    this.lastTime = now;
+                    if (dtSec > 0.2) dtSec = 0.016;
+                    const dir = this._tmpDir.subVectors(this.target, this.current);
+                    const dist = dir.length();
+                    if (dist < 0.01) {
+                        this.pickNewTarget();
+                        return;
+                    }
+                    dir.normalize();
+                    let ramp = 1;
+                    if (this.rampDurationMs > 0) {
+                        const t = Math.min(1, (now - this.activationTime) / this.rampDurationMs);
+                        ramp = t * t * (3 - 2 * t);
+                    }
+                    const step = this.speed * dtSec * ramp;
+                    const move = Math.min(step, dist);
+                    this.current.addScaledVector(dir, move);
+                    this.mouse.setNormalized(this.current.x, this.current.y);
+                }
+            }
+
+            const face_vert = `attribute vec3 position; uniform vec2 px; uniform vec2 boundarySpace; varying vec2 uv; precision highp float; void main(){ vec3 pos = position; vec2 scale = 1.0 - boundarySpace * 2.0; pos.xy = pos.xy * scale; uv = vec2(0.5)+(pos.xy)*0.5; gl_Position = vec4(pos, 1.0); }`;
+            const line_vert = `attribute vec3 position; uniform vec2 px; precision highp float; varying vec2 uv; void main(){ vec3 pos = position; uv = 0.5 + pos.xy * 0.5; vec2 n = sign(pos.xy); pos.xy = abs(pos.xy) - px * 1.0; pos.xy *= n; gl_Position = vec4(pos, 1.0); }`;
+            const mouse_vert = `precision highp float; attribute vec3 position; attribute vec2 uv; uniform vec2 center; uniform vec2 scale; uniform vec2 px; varying vec2 vUv; void main(){ vec2 pos = position.xy * scale * 2.0 * px + center; vUv = uv; gl_Position = vec4(pos, 0.0, 1.0); }`;
+            const advection_frag = `precision highp float; uniform sampler2D velocity; uniform float dt; uniform bool isBFECC; uniform vec2 fboSize; uniform vec2 px; varying vec2 uv; void main(){ vec2 ratio = max(fboSize.x, fboSize.y) / fboSize; if(isBFECC == false){ vec2 vel = texture2D(velocity, uv).xy; vec2 uv2 = uv - vel * dt * ratio; vec2 newVel = texture2D(velocity, uv2).xy; gl_FragColor = vec4(newVel, 0.0, 0.0); } else { vec2 spot_new = uv; vec2 vel_old = texture2D(velocity, uv).xy; vec2 spot_old = spot_new - vel_old * dt * ratio; vec2 vel_new1 = texture2D(velocity, spot_old).xy; vec2 spot_new2 = spot_old + vel_new1 * dt * ratio; vec2 error = spot_new2 - spot_new; vec2 spot_new3 = spot_new - error / 2.0; vec2 vel_2 = texture2D(velocity, spot_new3).xy; vec2 spot_old2 = spot_new3 - vel_2 * dt * ratio; vec2 newVel2 = texture2D(velocity, spot_old2).xy; gl_FragColor = vec4(newVel2, 0.0, 0.0); } }`;
+            const color_frag = `precision highp float; uniform sampler2D velocity; uniform sampler2D palette; uniform vec4 bgColor; varying vec2 uv; void main(){ vec2 vel = texture2D(velocity, uv).xy; float lenv = clamp(length(vel), 0.0, 1.0); vec3 c = texture2D(palette, vec2(lenv, 0.5)).rgb; vec3 outRGB = mix(bgColor.rgb, c, lenv); float outA = mix(bgColor.a, 1.0, lenv); gl_FragColor = vec4(outRGB, outA); }`;
+            const divergence_frag = `precision highp float; uniform sampler2D velocity; uniform float dt; uniform vec2 px; varying vec2 uv; void main(){ float x0 = texture2D(velocity, uv-vec2(px.x, 0.0)).x; float x1 = texture2D(velocity, uv+vec2(px.x, 0.0)).x; float y0 = texture2D(velocity, uv-vec2(0.0, px.y)).y; float y1 = texture2D(velocity, uv+vec2(0.0, px.y)).y; float divergence = (x1 - x0 + y1 - y0) / 2.0; gl_FragColor = vec4(divergence / dt); }`;
+            const externalForce_frag = `precision highp float; uniform vec2 force; uniform vec2 center; uniform vec2 scale; uniform vec2 px; varying vec2 vUv; void main(){ vec2 circle = (vUv - 0.5) * 2.0; float d = 1.0 - min(length(circle), 1.0); d *= d; gl_FragColor = vec4(force * d, 0.0, 1.0); }`;
+            const poisson_frag = `precision highp float; uniform sampler2D pressure; uniform sampler2D divergence; uniform vec2 px; varying vec2 uv; void main(){ float p0 = texture2D(pressure, uv + vec2(px.x * 2.0, 0.0)).r; float p1 = texture2D(pressure, uv - vec2(px.x * 2.0, 0.0)).r; float p2 = texture2D(pressure, uv + vec2(0.0, px.y * 2.0)).r; float p3 = texture2D(pressure, uv - vec2(0.0, px.y * 2.0)).r; float div = texture2D(divergence, uv).r; float newP = (p0 + p1 + p2 + p3) / 4.0 - div; gl_FragColor = vec4(newP); }`;
+            const pressure_frag = `precision highp float; uniform sampler2D pressure; uniform sampler2D velocity; uniform vec2 px; uniform float dt; varying vec2 uv; void main(){ float step = 1.0; float p0 = texture2D(pressure, uv + vec2(px.x * step, 0.0)).r; float p1 = texture2D(pressure, uv - vec2(px.x * step, 0.0)).r; float p2 = texture2D(pressure, uv + vec2(0.0, px.y * step)).r; float p3 = texture2D(pressure, uv - vec2(0.0, px.y * step)).r; vec2 v = texture2D(velocity, uv).xy; vec2 gradP = vec2(p0 - p1, p2 - p3) * 0.5; v = v - gradP * dt; gl_FragColor = vec4(v, 0.0, 1.0); }`;
+            const viscous_frag = `precision highp float; uniform sampler2D velocity; uniform sampler2D velocity_new; uniform float v; uniform vec2 px; uniform float dt; varying vec2 uv; void main(){ vec2 old = texture2D(velocity, uv).xy; vec2 new0 = texture2D(velocity_new, uv + vec2(px.x * 2.0, 0.0)).xy; vec2 new1 = texture2D(velocity_new, uv - vec2(px.x * 2.0, 0.0)).xy; vec2 new2 = texture2D(velocity_new, uv + vec2(0.0, px.y * 2.0)).xy; vec2 new3 = texture2D(velocity_new, uv - vec2(0.0, px.y * 2.0)).xy; vec2 newv = 4.0 * old + v * dt * (new0 + new1 + new2 + new3); newv /= 4.0 * (1.0 + v * dt); gl_FragColor = vec4(newv, 0.0, 0.0); }`;
+
+            class ShaderPass {
+                constructor(props) { this.props = props || {}; this.uniforms = this.props.material?.uniforms; this.scene = null; this.camera = null; this.material = null; this.geometry = null; this.plane = null; }
+                init() { this.scene = new THREE.Scene(); this.camera = new THREE.Camera(); if (this.uniforms) { this.material = new THREE.RawShaderMaterial(this.props.material); this.geometry = new THREE.PlaneGeometry(2.0, 2.0); this.plane = new THREE.Mesh(this.geometry, this.material); this.scene.add(this.plane); } }
+                update() { Common.renderer.setRenderTarget(this.props.output || null); Common.renderer.render(this.scene, this.camera); Common.renderer.setRenderTarget(null); }
+            }
+
+            class Advection extends ShaderPass {
+                constructor(simProps) { super({ material: { vertexShader: face_vert, fragmentShader: advection_frag, uniforms: { boundarySpace: { value: simProps.cellScale }, px: { value: simProps.cellScale }, fboSize: { value: simProps.fboSize }, velocity: { value: simProps.src.texture }, dt: { value: simProps.dt }, isBFECC: { value: true } } }, output: simProps.dst }); this.uniforms = this.props.material.uniforms; this.init(); }
+                init() { super.init(); this.createBoundary(); }
+                createBoundary() { const boundaryG = new THREE.BufferGeometry(); const vertices_boundary = new Float32Array([-1, -1, 0, -1, 1, 0, -1, 1, 0, 1, 1, 0, 1, 1, 0, 1, -1, 0, 1, -1, 0, -1, -1, 0]); boundaryG.setAttribute('position', new THREE.BufferAttribute(vertices_boundary, 3)); const boundaryM = new THREE.RawShaderMaterial({ vertexShader: line_vert, fragmentShader: advection_frag, uniforms: this.uniforms }); this.line = new THREE.LineSegments(boundaryG, boundaryM); this.scene.add(this.line); }
+                update({ dt, isBounce, BFECC }) { this.uniforms.dt.value = dt; this.line.visible = isBounce; this.uniforms.isBFECC.value = BFECC; super.update(); }
+            }
+
+            class ExternalForce extends ShaderPass {
+                constructor(simProps) { super({ output: simProps.dst }); this.init(simProps); }
+                init(simProps) { super.init(); const mouseG = new THREE.PlaneGeometry(1, 1); const mouseM = new THREE.RawShaderMaterial({ vertexShader: mouse_vert, fragmentShader: externalForce_frag, blending: THREE.AdditiveBlending, depthWrite: false, uniforms: { px: { value: simProps.cellScale }, force: { value: new THREE.Vector2(0.0, 0.0) }, center: { value: new THREE.Vector2(0.0, 0.0) }, scale: { value: new THREE.Vector2(simProps.cursor_size, simProps.cursor_size) } } }); this.mouse = new THREE.Mesh(mouseG, mouseM); this.scene.add(this.mouse); }
+                update(props) { const forceX = (Mouse.diff.x / 2) * props.mouse_force; const forceY = (Mouse.diff.y / 2) * props.mouse_force; const cursorSizeX = props.cursor_size * props.cellScale.x; const cursorSizeY = props.cursor_size * props.cellScale.y; const centerX = Math.min(Math.max(Mouse.coords.x, -1 + cursorSizeX + props.cellScale.x * 2), 1 - cursorSizeX - props.cellScale.x * 2); const centerY = Math.min(Math.max(Mouse.coords.y, -1 + cursorSizeY + props.cellScale.y * 2), 1 - cursorSizeY - props.cellScale.y * 2); const uniforms = this.mouse.material.uniforms; uniforms.force.value.set(forceX, forceY); uniforms.center.value.set(centerX, centerY); uniforms.scale.value.set(props.cursor_size, props.cursor_size); super.update(); }
+            }
+
+            class Viscous extends ShaderPass {
+                constructor(simProps) { super({ material: { vertexShader: face_vert, fragmentShader: viscous_frag, uniforms: { boundarySpace: { value: simProps.boundarySpace }, velocity: { value: simProps.src.texture }, velocity_new: { value: simProps.dst_.texture }, v: { value: simProps.viscous }, px: { value: simProps.cellScale }, dt: { value: simProps.dt } } }, output: simProps.dst, output0: simProps.dst_, output1: simProps.dst }); this.init(); }
+                update({ viscous, iterations, dt }) { let fbo_in, fbo_out; this.uniforms.v.value = viscous; for (let i = 0; i < iterations; i++) { if (i % 2 === 0) { fbo_in = this.props.output0; fbo_out = this.props.output1; } else { fbo_in = this.props.output1; fbo_out = this.props.output0; } this.uniforms.velocity_new.value = fbo_in.texture; this.props.output = fbo_out; this.uniforms.dt.value = dt; super.update(); } return fbo_out; }
+            }
+
+            class Divergence extends ShaderPass {
+                constructor(simProps) { super({ material: { vertexShader: face_vert, fragmentShader: divergence_frag, uniforms: { boundarySpace: { value: simProps.boundarySpace }, velocity: { value: simProps.src.texture }, px: { value: simProps.cellScale }, dt: { value: simProps.dt } } }, output: simProps.dst }); this.init(); }
+                update({ vel }) { this.uniforms.velocity.value = vel.texture; super.update(); }
+            }
+
+            class Poisson extends ShaderPass {
+                constructor(simProps) { super({ material: { vertexShader: face_vert, fragmentShader: poisson_frag, uniforms: { boundarySpace: { value: simProps.boundarySpace }, pressure: { value: simProps.dst_.texture }, divergence: { value: simProps.src.texture }, px: { value: simProps.cellScale } } }, output: simProps.dst, output0: simProps.dst_, output1: simProps.dst }); this.init(); }
+                update({ iterations }) { let p_in, p_out; for (let i = 0; i < iterations; i++) { if (i % 2 === 0) { p_in = this.props.output0; p_out = this.props.output1; } else { p_in = this.props.output1; p_out = this.props.output0; } this.uniforms.pressure.value = p_in.texture; this.props.output = p_out; super.update(); } return p_out; }
+            }
+
+            class Pressure extends ShaderPass {
+                constructor(simProps) { super({ material: { vertexShader: face_vert, fragmentShader: pressure_frag, uniforms: { boundarySpace: { value: simProps.boundarySpace }, pressure: { value: simProps.src_p.texture }, velocity: { value: simProps.src_v.texture }, px: { value: simProps.cellScale }, dt: { value: simProps.dt } } }, output: simProps.dst }); this.init(); }
+                update({ vel, pressure }) { this.uniforms.velocity.value = vel.texture; this.uniforms.pressure.value = pressure.texture; super.update(); }
+            }
+
+            class Simulation {
+                constructor(options) { this.options = { ...options }; this.fbos = { vel_0: null, vel_1: null, vel_viscous0: null, vel_viscous1: null, div: null, pressure_0: null, pressure_1: null }; this.fboSize = new THREE.Vector2(); this.cellScale = new THREE.Vector2(); this.boundarySpace = new THREE.Vector2(); this.init(); }
+                init() { this.calcSize(); this.createAllFBO(); this.createShaderPass(); }
+                getFloatType() { return /(iPad|iPhone|iPod)/i.test(navigator.userAgent) ? THREE.HalfFloatType : THREE.FloatType; }
+                createAllFBO() { const type = this.getFloatType(); const opts = { type, depthBuffer: false, stencilBuffer: false, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, wrapS: THREE.ClampToEdgeWrapping, wrapT: THREE.ClampToEdgeWrapping }; for (let key in this.fbos) { this.fbos[key] = new THREE.WebGLRenderTarget(this.fboSize.x, this.fboSize.y, opts); } }
+                createShaderPass() { this.advection = new Advection({ cellScale: this.cellScale, fboSize: this.fboSize, dt: this.options.dt, src: this.fbos.vel_0, dst: this.fbos.vel_1 }); this.externalForce = new ExternalForce({ cellScale: this.cellScale, cursor_size: this.options.cursor_size, dst: this.fbos.vel_1 }); this.viscous = new Viscous({ cellScale: this.cellScale, boundarySpace: this.boundarySpace, viscous: this.options.viscous, src: this.fbos.vel_1, dst: this.fbos.vel_viscous1, dst_: this.fbos.vel_viscous0, dt: this.options.dt }); this.divergence = new Divergence({ cellScale: this.cellScale, boundarySpace: this.boundarySpace, src: this.fbos.vel_viscous0, dst: this.fbos.div, dt: this.options.dt }); this.poisson = new Poisson({ cellScale: this.cellScale, boundarySpace: this.boundarySpace, src: this.fbos.div, dst: this.fbos.pressure_1, dst_: this.fbos.pressure_0 }); this.pressure = new Pressure({ cellScale: this.cellScale, boundarySpace: this.boundarySpace, src_p: this.fbos.pressure_0, src_v: this.fbos.vel_viscous0, dst: this.fbos.vel_0, dt: this.options.dt }); }
+                calcSize() { const width = Math.max(1, Math.round(this.options.resolution * Common.width)); const height = Math.max(1, Math.round(this.options.resolution * Common.height)); this.cellScale.set(1 / width, 1 / height); this.fboSize.set(width, height); }
+                resize() { this.calcSize(); for (let key in this.fbos) { this.fbos[key].setSize(this.fboSize.x, this.fboSize.y); } }
+                update() { if (this.options.isBounce) { this.boundarySpace.set(0, 0); } else { this.boundarySpace.copy(this.cellScale); } this.advection.update({ dt: this.options.dt, isBounce: this.options.isBounce, BFECC: this.options.BFECC }); this.externalForce.update({ cursor_size: this.options.cursor_size, mouse_force: this.options.mouse_force, cellScale: this.cellScale }); let vel = this.fbos.vel_1; if (this.options.isViscous) { vel = this.viscous.update({ viscous: this.options.viscous, iterations: this.options.iterations_viscous, dt: this.options.dt }); } this.divergence.update({ vel }); const pressure = this.poisson.update({ iterations: this.options.iterations_poisson }); this.pressure.update({ vel, pressure }); }
+            }
+
+            class Output {
+                constructor() { this.init(); }
+                init() { this.simulation = new Simulation({
+                    iterations_poisson: config.iterationsPoisson,
+                    iterations_viscous: config.iterationsViscous,
+                    mouse_force: config.mouseForce,
+                    resolution: config.resolution,
+                    cursor_size: config.cursorSize,
+                    viscous: config.viscous,
+                    isBounce: config.isBounce,
+                    dt: config.dt,
+                    isViscous: config.isViscous,
+                    BFECC: config.BFECC
+                }); this.scene = new THREE.Scene(); this.camera = new THREE.Camera(); this.output = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.RawShaderMaterial({ vertexShader: face_vert, fragmentShader: color_frag, transparent: true, depthWrite: false, uniforms: { velocity: { value: this.simulation.fbos.vel_0.texture }, boundarySpace: { value: new THREE.Vector2() }, palette: { value: paletteTex }, bgColor: { value: bgVec4 } } })); this.scene.add(this.output); }
+                resize() { this.simulation.resize(); }
+                render() { Common.renderer.setRenderTarget(null); Common.renderer.render(this.scene, this.camera); }
+                update() { this.simulation.update(); this.render(); }
+            }
+
+            class WebGLManager {
+                constructor(props) { this.props = props; Common.init(props.$wrapper); Mouse.init(props.$wrapper); Mouse.autoIntensity = props.autoIntensity; Mouse.takeoverDuration = props.takeoverDuration; this.lastUserInteraction = performance.now(); Mouse.onInteract = () => { this.lastUserInteraction = performance.now(); if (this.autoDriver) this.autoDriver.forceStop(); }; this.autoDriver = new AutoDriver(Mouse, this, { enabled: props.autoDemo, speed: props.autoSpeed, resumeDelay: props.autoResumeDelay, rampDuration: props.autoRampDuration }); this.init(); this._loop = this.loop.bind(this); this._resize = this.resize.bind(this); window.addEventListener('resize', this._resize); this._onVisibility = () => { if (document.hidden) { this.pause(); } else if (isVisible) { this.start(); } }; document.addEventListener('visibilitychange', this._onVisibility); this.running = false; }
+                init() { this.props.$wrapper.prepend(Common.renderer.domElement); this.output = new Output(); }
+                resize() { Common.resize(); this.output.resize(); }
+                render() { if (this.autoDriver) this.autoDriver.update(); Mouse.update(); Common.update(); this.output.update(); }
+                loop() { if (!this.running) return; this.render(); rafRef = requestAnimationFrame(this._loop); }
+                start() { if (this.running) return; this.running = true; this._loop(); }
+                pause() { this.running = false; if (rafRef) { cancelAnimationFrame(rafRef); rafRef = null; } }
+                dispose() { try { window.removeEventListener('resize', this._resize); document.removeEventListener('visibilitychange', this._onVisibility); Mouse.dispose(); this.pause(); } catch (e) { console.error(e); } }
+            }
+            
+            const webglManager = new WebGLManager({
+                $wrapper: mountRef,
+                ...config
+            });
+            webglManager.start();
+        }
+    </script>
+
+</body>
+</html>
+
