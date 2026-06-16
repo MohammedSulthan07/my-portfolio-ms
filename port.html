@@ -1,0 +1,1907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mohammed Sulthan G — Interactive Portfolio</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Space Grotesk & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Three.js CDN for interactive Liquid Ether Background -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        :root {
+            --font-space: 'Space Grotesk', sans-serif;
+            --font-inter: 'Inter', sans-serif;
+            --glass-bg: rgba(10, 10, 18, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glow-color: rgba(99, 102, 241, 0.15);
+        }
+
+        body {
+            font-family: var(--font-space);
+            background-color: #030303;
+            color: #ffffff;
+            margin: 0;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* custom interactive scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 99px;
+            border: 2px solid transparent;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* --- Liquid Ether Background Canvas --- */
+        #liquid-ether-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: all;
+        }
+
+        /* --- Global Structural Overlays --- */
+        .page-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+
+        .active-content-space {
+            pointer-events: auto;
+        }
+
+        /* --- Glassmorphism Framework --- */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 16px 48px 0 rgba(99, 102, 241, 0.15);
+        }
+
+        /* --- Navigation Dynamic Dock Rules --- */
+        .dock-panel {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: flex-end;
+            gap: 0.75rem;
+            border-radius: 24px;
+            background: rgba(10, 10, 15, 0.65);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 0.6rem 1rem;
+            z-index: 100;
+            pointer-events: auto;
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.7);
+        }
+
+        .dock-item {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            cursor: pointer;
+            outline: none;
+            will-change: transform;
+            transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .dock-tooltip {
+            position: absolute;
+            top: -3.2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(5px) scale(0.9);
+            white-space: nowrap;
+            padding: 6px 14px;
+            border-radius: 12px;
+            background: rgba(10, 10, 15, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 600;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+
+        .dock-item:hover .dock-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0) scale(1);
+        }
+
+        .dock-icon-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 3.5rem;
+            height: 3.5rem;
+            background-color: transparent;
+            border-radius: 16px;
+            transition: background-color 0.3s, border-color 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .dock-item:hover .dock-icon-wrapper {
+            background-color: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .dock-item.active .dock-icon-wrapper {
+            background-color: rgba(255, 255, 255, 0.08);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+        }
+
+        .m3-pill {
+            position: absolute;
+            bottom: -6px;
+            height: 4px;
+            width: 0;
+            background: linear-gradient(90deg, #6366f1, #a855f7);
+            border-radius: 9999px;
+            transition: width 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+        }
+
+        .dock-item.active .m3-pill {
+            width: 20px;
+        }
+
+        /* --- Dynamic Text Slots --- */
+        .rotating-card-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .rotating-card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 260px;
+            height: 54px;
+            padding: 0 1.2rem;
+            background: #ffffff;
+            color: #030303;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            white-space: nowrap;
+        }
+        .slot {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .word {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            opacity: 0;
+            transform: translateY(15px) scale(0.95);
+        }
+        .word.in {
+            animation: word-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .word.out {
+            animation: word-exit 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes word-enter {
+            from { opacity: 0; transform: translateY(15px) scale(0.95); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes word-exit {
+            from { opacity: 1; transform: translateY(0) scale(1); }
+            to   { opacity: 0; transform: translateY(-15px) scale(0.95); }
+        }
+
+        /* --- Portfolio Experience Expandable Accordion --- */
+        .expand-icon { transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+        .glass-card.expanded .expand-icon { transform: rotate(180deg); }
+
+        .details-content {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+        }
+        .glass-card.expanded .details-content {
+            max-height: 1200px;
+            opacity: 1;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* --- Dynamic Custom Lists (+ bullet) --- */
+        .custom-plus-list li {
+            padding-left: 1.75rem;
+            position: relative;
+        }
+        .custom-plus-list li::before {
+            content: '+';
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: #6366f1;
+            font-size: 1.25rem;
+            font-weight: 700;
+            line-height: 1.5rem;
+        }
+
+        /* --- Certifications Accordion & Infinite Marquee Setup --- */
+        .cert-container .category-header {
+            border: 1.5px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .cert-container .category-header:hover {
+            background: rgba(255, 255, 255, 0.03);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+        .cert-container .cert-tray {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .cert-container .category-header.active-tray + .cert-tray {
+            max-height: 380px;
+        }
+        .scroll-container {
+            overflow: hidden;
+            white-space: nowrap;
+            padding: 1rem 0;
+            position: relative;
+        }
+        .scroll-container::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: linear-gradient(90deg, #030303 0%, transparent 8%, transparent 92%, #030303 100%);
+            z-index: 2;
+        }
+        .track {
+            display: inline-flex;
+            align-items: center;
+            gap: 1.5rem;
+            animation: marquee 25s linear infinite;
+        }
+        .track:hover {
+            animation-play-state: paused;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .cert-pair {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1.25rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+        .cert-pair:hover {
+            transform: scale(1.02);
+            border-color: rgba(99, 102, 241, 0.3);
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .cert-pair img {
+            height: 120px;
+            width: auto;
+            border-radius: 8px;
+            object-fit: contain;
+            background: #121214;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+
+        /* --- Modular Viewports --- */
+        .page-section {
+            display: none;
+            width: 100%;
+            min-height: 100vh;
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.5s ease-out, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .page-section.active-view {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- Glowing Micro-layouts for Contacts --- */
+        .glow-border {
+            position: relative;
+        }
+        .glow-border::after {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            background: linear-gradient(45deg, #6366f1, #a855f7);
+            z-index: -1;
+            border-radius: inherit;
+            opacity: 0.15;
+            transition: opacity 0.3s ease;
+        }
+        .glow-border:hover::after {
+            opacity: 0.4;
+        }
+
+        /* Modal Overlay */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(3, 3, 5, 0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .modal.active { display: flex; }
+
+        @media (max-width: 768px) {
+            .dock-panel {
+                bottom: 1rem;
+                gap: 0.4rem;
+                padding: 0.4rem 0.6rem;
+            }
+            .dock-icon-wrapper {
+                width: 2.8rem;
+                height: 2.8rem;
+                border-radius: 12px;
+            }
+            .dock-icon-wrapper svg {
+                width: 20px;
+                height: 20px;
+            }
+            .dock-tooltip { display: none !important; }
+        }
+    </style>
+</head>
+<body class="antialiased font-sans">
+
+    <!-- Container for dynamic visual backdrop -->
+    <div id="liquid-ether-background"></div>
+
+    <div class="page-container flex flex-col min-h-screen">
+        
+        <!-- Header status bar element -->
+        <header class="w-full max-w-7xl mx-auto px-6 py-6 flex justify-between items-center z-50 pointer-events-auto">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-tr from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/20">
+                    <span class="text-white font-bold text-lg font-mono">MS</span>
+                </div>
+                <div>
+                    <h1 class="text-xs font-bold uppercase tracking-widest text-neutral-400 font-mono">Mohammed Sulthan G</h1>
+                    <p class="text-[10px] text-neutral-500 font-mono font-medium">v3.0.0 // AI & Software Systems</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-2 bg-emerald-500/10 text-emerald-400 px-3 py-1.5 rounded-full text-xs font-bold border border-emerald-500/20 shadow-sm">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse mr-2"></span>
+                <span>Active Infrastructure</span>
+            </div>
+        </header>
+
+        <!-- CORE CONTENT AREA -->
+        <div class="active-content-space flex-grow w-full max-w-6xl mx-auto px-4 md:px-6 py-8 pb-32 z-40">
+            
+            <!-- HOME VIEW -->
+            <section id="home-view" class="page-section active-view">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+                    <!-- Left Core Columns -->
+                    <div class="lg:col-span-7 flex flex-col justify-between gap-8">
+                        <div class="glass-card p-8 glow-border">
+                            <span class="text-xs uppercase font-extrabold tracking-widest text-indigo-400">Interactive Shell // Ready</span>
+                            
+                            <!-- Name Translator Module -->
+                            <div id="translation-card" class="mt-4 flex items-center justify-between bg-white/5 border border-white/5 p-5 rounded-2xl">
+                                <div>
+                                    <h2 id="greeting" class="text-xs font-semibold text-neutral-400 uppercase tracking-wider transition-all duration-300">HELLO, I'M</h2>
+                                    <h1 id="name" class="text-3xl sm:text-4xl font-extrabold tracking-tight mt-1 text-white transition-all duration-300">MOHAMMED SULTHAN G</h1>
+                                </div>
+                                <button id="translate-button" class="w-12 h-12 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all duration-300 hover:rotate-12" title="Translate Name Matrix">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Spinning Roles Engine -->
+                            <div class="mt-6 flex flex-col md:flex-row items-start md:items-center gap-4">
+                                <span class="text-sm font-semibold tracking-wider text-neutral-400">ENGINE_LOG :</span>
+                                <div class="rotating-card-container">
+                                    <div class="rotating-card" id="rotating-card">
+                                        <div class="slot" id="slot"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Core CV Actions -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <a href="#about-view" onclick="activateSection('about-view')" class="glass-card p-6 flex items-center justify-between border-l-4 border-l-indigo-500 hover:bg-white/5">
+                                <div>
+                                    <h3 class="text-lg font-bold">Discover More</h3>
+                                    <p class="text-xs text-neutral-400 mt-1">Read background & biography</p>
+                                </div>
+                                <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+                            </a>
+                            <a href="resume.pdf" download="Mohammed_Sulthan_G_Resume.pdf" class="glass-card p-6 flex items-center justify-between border-l-4 border-l-purple-500 hover:bg-white/5">
+                                <div>
+                                    <h3 class="text-lg font-bold">Download Resume</h3>
+                                    <p class="text-xs text-neutral-400 mt-1">PDF File Download Pipeline</p>
+                                </div>
+                                <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Right Column Interactive Mock Screen -->
+                    <div class="lg:col-span-5">
+                        <div class="glass-card h-full p-8 flex flex-col justify-between space-y-8 min-h-[350px]">
+                            <div class="flex items-center justify-between pb-4 border-b border-white/5">
+                                <span class="text-xs font-mono text-neutral-400">SYS_ANALYSIS_CHART</span>
+                                <span class="text-xs px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-mono">Live telemetry</span>
+                            </div>
+                            <div class="flex-grow flex flex-col justify-center space-y-6">
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-xs font-mono">
+                                        <span>DEEP LEARNING PIPELINES</span>
+                                        <span class="text-indigo-400 font-bold">94%</span>
+                                    </div>
+                                    <div class="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                                        <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 w-[94%] rounded-full"></div>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-xs font-mono">
+                                        <span>BACKEND WEB ENGINE</span>
+                                        <span class="text-indigo-400 font-bold">88%</span>
+                                    </div>
+                                    <div class="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                                        <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 w-[88%] rounded-full"></div>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-xs font-mono">
+                                        <span>UI GRAPHICAL COMPOSITION</span>
+                                        <span class="text-indigo-400 font-bold">82%</span>
+                                    </div>
+                                    <div class="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                                        <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 w-[82%] rounded-full"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="pt-4 border-t border-white/5 text-[11px] text-neutral-500 font-mono">
+                                > Automated telemetry updated on 2026 systems load check.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ABOUT VIEW -->
+            <section id="about-view" class="page-section">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch">
+                    <!-- Col 1 -->
+                    <div class="md:col-span-5 flex flex-col justify-between gap-8">
+                        <div class="glass-card p-8">
+                            <span class="text-xs uppercase font-extrabold tracking-widest text-indigo-400">Biography</span>
+                            <h2 class="text-3xl font-extrabold tracking-tight mt-2 mb-4">MOHAMMED SULTHAN G</h2>
+                            <hr class="border-white/5 mb-4">
+                            <p class="text-neutral-300 text-sm leading-relaxed font-sans uppercase">
+                                HI, I'M MOHAMMED SULTHAN G. I'M PASSIONATE ABOUT TECHNOLOGY, CREATIVITY, AND PROBLEM-SOLVING. MY JOURNEY STARTED WITH A CURIOSITY TO UNDERSTAND HOW THINGS WORK, WHICH NATURALLY GREW INTO LEARNING PROGRAMMING, BUILDING PROJECTS, AND EXPLORING REAL-WORLD APPLICATIONS OF TECH.
+                            </p>
+                        </div>
+                        <div class="glass-card p-6">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-bold tracking-wider">Download PDF Resume</span>
+                                <a href="resume.pdf" download="Mohammed_Sulthan_G_Resume.pdf" class="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-indigo-400 hover:text-indigo-400 transition-all flex items-center justify-center">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16"/></svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Col 2 -->
+                    <div class="md:col-span-7 flex flex-col gap-8">
+                        <div class="glass-card p-8">
+                            <h3 class="text-xl font-bold tracking-tight mb-4 flex items-center">
+                                <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 mr-3"></span> WHAT I DO
+                            </h3>
+                            <ul class="space-y-4 custom-plus-list text-sm text-neutral-300 font-sans uppercase">
+                                <li>DEVELOP APPS, GAMES, AND WEB PROJECTS THAT COMBINE FUNCTIONALITY WITH SIMPLICITY.</li>
+                                <li>WORK ON AI, MACHINE LEARNING, AND INNOVATIVE PROBLEM-SOLVING PROJECTS.</li>
+                                <li>CONSTANTLY LEARN AND SHARE KNOWLEDGE THROUGH HANDS-ON PRACTICE.</li>
+                            </ul>
+                        </div>
+
+                        <div class="glass-card p-8">
+                            <h3 class="text-xl font-bold tracking-tight mb-4 flex items-center">
+                                <span class="w-2.5 h-2.5 rounded-full bg-purple-500 mr-3"></span> INTERESTS
+                            </h3>
+                            <ul class="space-y-3 custom-plus-list text-sm text-neutral-300 font-sans uppercase">
+                                <li>EXPLORING NEW TECHNOLOGIES AND FRAMEWORKS.</li>
+                                <li>CREATING USER-FRIENDLY APPS & WEBSITES.</li>
+                                <li>ARTIFICIAL INTELLIGENCE, DEEP LEARNING, AND DATA SCIENCE.</li>
+                                <li>COMMUNITY LEARNING.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SKILLS VIEW -->
+            <section id="skills-view" class="page-section">
+                <div class="space-y-8">
+                    <div class="glass-card p-8">
+                        <span class="text-xs uppercase font-extrabold tracking-widest text-indigo-400">Technical Capability Matrix</span>
+                        <h2 class="text-3xl font-extrabold tracking-tight mt-2">SYSTEM COMPETENCIES</h2>
+                        <p class="text-neutral-400 text-sm mt-1">Quantified proficiency logs based on actual built assets and internship audits.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Machine Learning Stack -->
+                        <div class="glass-card p-8 space-y-6">
+                            <h3 class="text-lg font-bold text-indigo-400 tracking-wider">AI & DATA SCIENCE</h3>
+                            <div class="space-y-4 font-sans text-sm">
+                                <div class="space-y-1">
+                                    <div class="flex justify-between"><span class="text-neutral-300 font-medium">Computer Vision (YOLOv8, OpenCV)</span><span class="font-bold">92%</span></div>
+                                    <div class="h-1.5 w-full bg-white/5 rounded-full"><div class="h-full bg-indigo-500 w-[92%] rounded-full"></div></div>
+                                </div>
+                                <div class="space-y-1">
+                                    <div class="flex justify-between"><span class="text-neutral-300 font-medium">Data Modeling (SMOTE, Scikit-learn)</span><span class="font-bold">85%</span></div>
+                                    <div class="h-1.5 w-full bg-white/5 rounded-full"><div class="h-full bg-indigo-500 w-[85%] rounded-full"></div></div>
+                                </div>
+                                <div class="space-y-1">
+                                    <div class="flex justify-between"><span class="text-neutral-300 font-medium">Graph Neural Networks (PyTorch Geometric)</span><span class="font-bold">78%</span></div>
+                                    <div class="h-1.5 w-full bg-white/5 rounded-full"><div class="h-full bg-indigo-500 w-[78%] rounded-full"></div></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Backend & Engineering Stack -->
+                        <div class="glass-card p-8 space-y-6">
+                            <h3 class="text-lg font-bold text-purple-400 tracking-wider">BACKEND ARCHITECTURE</h3>
+                            <div class="space-y-4 font-sans text-sm">
+                                <div class="space-y-1">
+                                    <div class="flex justify-between"><span class="text-neutral-300 font-medium">Java Development (JDBC, Swing, SpringBoot)</span><span class="font-bold">90%</span></div>
+                                    <div class="h-1.5 w-full bg-white/5 rounded-full"><div class="h-full bg-purple-500 w-[90%] rounded-full"></div></div>
+                                </div>
+                                <div class="space-y-1">
+                                    <div class="flex justify-between"><span class="text-neutral-300 font-medium">Python REST APIs (Flask, FastAPI)</span><span class="font-bold">86%</span></div>
+                                    <div class="h-1.5 w-full bg-white/5 rounded-full"><div class="h-full bg-purple-500 w-[86%] rounded-full"></div></div>
+                                </div>
+                                <div class="space-y-1">
+                                    <div class="flex justify-between"><span class="text-neutral-300 font-medium">Database Optimization (PostgreSQL, SQLite)</span><span class="font-bold">88%</span></div>
+                                    <div class="h-1.5 w-full bg-white/5 rounded-full"><div class="h-full bg-purple-500 w-[88%] rounded-full"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PROJECTS VIEW -->
+            <section id="projects-view" class="page-section">
+                <div class="space-y-8">
+                    <div class="glass-card p-8">
+                        <span class="text-xs uppercase font-extrabold tracking-widest text-indigo-400">Engineering Portfolios</span>
+                        <h2 class="text-3xl font-extrabold tracking-tight mt-2">INTELLIGENT SYSTEMS SHOWCASE</h2>
+                        <p class="text-neutral-400 text-sm mt-1">Click on any system deployment to expand functional logs and metrics.</p>
+                    </div>
+
+                    <div class="space-y-6">
+                        
+                        <!-- Project 1: YOLOv8 Safety Eye -->
+                        <div class="glass-card p-6 md:p-8 cursor-pointer" onclick="toggleAccordion(this)">
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                <div class="space-y-2">
+                                    <span class="text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-widest font-bold">COMPUTER VISION</span>
+                                    <h3 class="text-2xl font-bold">YOLOv8 Safety Eye</h3>
+                                    <p class="text-sm text-neutral-400 leading-relaxed max-w-2xl">Automated safety compliance verification via live camera pipelines. Monitors sites for mandatory PPE vest & hardhat wearing.</p>
+                                </div>
+                                <div class="flex items-center space-x-3 flex-shrink-0">
+                                    <span class="text-xs font-mono px-2 py-1 bg-white/5 text-neutral-400 rounded">mAP: 94%</span>
+                                    <svg class="expand-icon w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                                </div>
+                            </div>
+                            <div class="details-content grid grid-cols-1 md:grid-cols-2 gap-8 font-sans">
+                                <div class="space-y-3">
+                                    <h4 class="text-xs uppercase font-bold text-emerald-400 tracking-wider">Functional Mission</h4>
+                                    <p class="text-neutral-300 text-sm leading-relaxed">Ensure absolute safety enforcement on construction platforms, substituting human spotters with a zero-latency automated inspection stream.</p>
+                                </div>
+                                <div class="space-y-3">
+                                    <h4 class="text-xs uppercase font-bold text-emerald-400 tracking-wider">Technical Core</h4>
+                                    <ul class="text-xs text-neutral-400 space-y-1.5 list-disc pl-4">
+                                        <li>Optimized Custom training datasets (5k+ annotated captures).</li>
+                                        <li>High speed inference tracking at ~30ms frame rates.</li>
+                                        <li>Modular safety exception dispatcher via API endpoints.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Project 2: AI Fraud Detection -->
+                        <div class="glass-card p-6 md:p-8 cursor-pointer" onclick="toggleAccordion(this)">
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                <div class="space-y-2">
+                                    <span class="text-xs px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 uppercase tracking-widest font-bold">MACHINE LEARNING</span>
+                                    <h3 class="text-2xl font-bold">AI Credit Card Fraud Detection</h3>
+                                    <p class="text-sm text-neutral-400 leading-relaxed max-w-2xl">High accuracy transaction monitoring model trained with unbalanced sets using Random Forest classifiers and synthetic balancing (SMOTE).</p>
+                                </div>
+                                <div class="flex items-center space-x-3 flex-shrink-0">
+                                    <span class="text-xs font-mono px-2 py-1 bg-white/5 text-neutral-400 rounded">F1 Score: 0.92</span>
+                                    <svg class="expand-icon w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                                </div>
+                            </div>
+                            <div class="details-content grid grid-cols-1 md:grid-cols-2 gap-8 font-sans">
+                                <div class="space-y-3">
+                                    <h4 class="text-xs uppercase font-bold text-indigo-400 tracking-wider">Functional Mission</h4>
+                                    <p class="text-neutral-300 text-sm leading-relaxed">Securing financial transaction nodes by analyzing raw transaction profiles, minimizing user-level friction and false-alarm lockouts.</p>
+                                </div>
+                                <div class="space-y-3">
+                                    <h4 class="text-xs uppercase font-bold text-indigo-400 tracking-wider">Technical Core</h4>
+                                    <ul class="text-xs text-neutral-400 space-y-1.5 list-disc pl-4">
+                                        <li>Applied SMOTE mechanics to solve severe unbalanced sample density ratios.</li>
+                                        <li>Engineered advanced metrics correlation using Scikit-Learn pipelines.</li>
+                                        <li>GridSearchCV parameter tuning routines for optimal model parameters.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Project 3: Database Analytics Engine -->
+                        <div class="glass-card p-6 md:p-8 cursor-pointer" onclick="toggleAccordion(this)">
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                <div class="space-y-2">
+                                    <span class="text-xs px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase tracking-widest font-bold">DATA ENGINEERING</span>
+                                    <h3 class="text-2xl font-bold">Database Activity Analytics</h3>
+                                    <p class="text-sm text-neutral-400 leading-relaxed max-w-2xl">PostgreSQL query and system table monitor. Dynamically exports diagnostics dashboard and distributes security alerts via SMTP protocol.</p>
+                                </div>
+                                <div class="flex items-center space-x-3 flex-shrink-0">
+                                    <span class="text-xs font-mono px-2 py-1 bg-white/5 text-neutral-400 rounded">Auto-audit</span>
+                                    <svg class="expand-icon w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                                </div>
+                            </div>
+                            <div class="details-content grid grid-cols-1 md:grid-cols-2 gap-8 font-sans">
+                                <div class="space-y-3">
+                                    <h4 class="text-xs uppercase font-bold text-amber-400 tracking-wider">Functional Mission</h4>
+                                    <p class="text-neutral-300 text-sm leading-relaxed">Maintains system database structural health by compiling query speed statistics and signaling operations desks during performance spikes.</p>
+                                </div>
+                                <div class="space-y-3">
+                                    <h4 class="text-xs uppercase font-bold text-amber-400 tracking-wider">Technical Core</h4>
+                                    <ul class="text-xs text-neutral-400 space-y-1.5 list-disc pl-4">
+                                        <li>Automated regex profiling of database query catalogs.</li>
+                                        <li>Integrated automated SMTP mailing layers sending system metrics reports.</li>
+                                        <li>Low-footprint local cron scheduling logic in Python scripts.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Project 4: Smart Contact Manager -->
+                        <div class="glass-card p-6 md:p-8 cursor-pointer" onclick="toggleAccordion(this)">
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                <div class="space-y-2">
+                                    <span class="text-xs px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase tracking-widest font-bold">JAVA DEVELOPMENT</span>
+                                    <h3 class="text-2xl font-bold">Smart Contact Manager</h3>
+                                    <p class="text-sm text-neutral-400 leading-relaxed max-w-2xl">Secure desktop profile manager using Java Swing user interfaces and transactional SQL database queries.</p>
+                                </div>
+                                <div class="flex items-center space-x-3 flex-shrink-0">
+                                    <span class="text-xs font-mono px-2 py-1 bg-white/5 text-neutral-400 rounded">ACID SQL</span>
+                                    <svg class="expand-icon w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                                </div>
+                            </div>
+                            <div class="details-content grid grid-cols-1 md:grid-cols-2 gap-8 font-sans">
+                                <div class="space-y-3">
+                                    <h4 class="text-xs uppercase font-bold text-blue-400 tracking-wider">Functional Mission</h4>
+                                    <p class="text-neutral-300 text-sm leading-relaxed">Provide a multi-user interface that secures user contact matrices behind local credentials, using structured programming models.</p>
+                                </div>
+                                <div class="space-y-3">
+                                    <h4 class="text-xs uppercase font-bold text-blue-400 tracking-wider">Technical Core</h4>
+                                    <ul class="text-xs text-neutral-400 space-y-1.5 list-disc pl-4">
+                                        <li>Employed Java Database Connectivity (JDBC) for reliable database operations.</li>
+                                        <li>Abstracted backend transactions via the Data Access Object (DAO) pattern.</li>
+                                        <li>Designed robust Swing Table models ensuring prompt frame refreshes.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Project 5: Intelligent Chatbot -->
+                        <div class="glass-card p-6 md:p-8 cursor-pointer" onclick="toggleAccordion(this)">
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                <div class="space-y-2">
+                                    <span class="text-xs px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 uppercase tracking-widest font-bold">FULL STACK AI</span>
+                                    <h3 class="text-2xl font-bold">Intelligent Context Agent</h3>
+                                    <p class="text-sm text-neutral-400 leading-relaxed max-w-2xl">Web-integrated conversational assistant powered by a Flask API endpoint, delivering contextualized, real-time responses.</p>
+                                </div>
+                                <div class="flex items-center space-x-3 flex-shrink-0">
+                                    <span class="text-xs font-mono px-2 py-1 bg-white/5 text-neutral-400 rounded">LLM Integration</span>
+                                    <svg class="expand-icon w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                                </div>
+                            </div>
+                            <div class="details-content grid grid-cols-1 md:grid-cols-2 gap-8 font-sans">
+                                <div class="space-y-3">
+                                    <h4 class="text-xs uppercase font-bold text-cyan-400 tracking-wider">Functional Mission</h4>
+                                    <p class="text-neutral-300 text-sm leading-relaxed">Democratize access to internal system support indexes using a high-throughput natural language agent.</p>
+                                </div>
+                                <div class="space-y-3">
+                                    <h4 class="text-xs uppercase font-bold text-cyan-400 tracking-wider">Technical Core</h4>
+                                    <ul class="text-xs text-neutral-400 space-y-1.5 list-disc pl-4">
+                                        <li>Secure system prompt templates preventing interface payload injections.</li>
+                                        <li>Flask REST endpoints handling requests with sub-200ms round trips.</li>
+                                        <li>Client-side session memory layers tracking recent conversation states.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Project 6: Hybrid GNN Recommendation System -->
+                        <div class="glass-card p-6 md:p-8 cursor-pointer" onclick="toggleAccordion(this)">
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                <div class="space-y-2">
+                                    <span class="text-xs px-2.5 py-1 rounded-full bg-pink-500/10 text-pink-400 border border-pink-500/20 uppercase tracking-widest font-bold">GRAPH NEURAL NETS</span>
+                                    <h3 class="text-2xl font-bold">Friend Recommendation System</h3>
+                                    <p class="text-sm text-neutral-400 leading-relaxed max-w-2xl">A hybrid machine learning architecture merging NetworkX topological graphs and GCN models using PyTorch Geometric.</p>
+                                </div>
+                                <div class="flex items-center space-x-3 flex-shrink-0">
+                                    <span class="text-xs font-mono px-2 py-1 bg-white/5 text-neutral-400 rounded">PyTorch PyG</span>
+                                    <svg class="expand-icon w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                                </div>
+                            </div>
+                            <div class="details-content grid grid-cols-1 md:grid-cols-2 gap-8 font-sans">
+                                <div class="space-y-3">
+                                    <h4 class="text-xs uppercase font-bold text-pink-400 tracking-wider">Functional Mission</h4>
+                                    <p class="text-neutral-300 text-sm leading-relaxed">Discover organic network nodes correlation by evaluating relational link metrics via deep geometric graph structures.</p>
+                                </div>
+                                <div class="space-y-3">
+                                    <h4 class="text-xs uppercase font-bold text-pink-400 tracking-wider">Technical Core</h4>
+                                    <ul class="text-xs text-neutral-400 space-y-1.5 list-disc pl-4">
+                                        <li>Programmed the Barabási–Albert generator logic representing synthetic networks.</li>
+                                        <li>Constructed 2-layer Graph Convolutional Networks modeling relational matrices.</li>
+                                        <li>Evaluated edge-wise MSE losses to output refined similarity scores.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Project 7: Currency Converter -->
+                        <div class="glass-card p-6 md:p-8 cursor-pointer" onclick="toggleAccordion(this)">
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                <div class="space-y-2">
+                                    <span class="text-xs px-2.5 py-1 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20 uppercase tracking-widest font-bold">API INTEGRATION</span>
+                                    <h3 class="text-2xl font-bold">Real-time Currency Converter</h3>
+                                    <p class="text-sm text-neutral-400 leading-relaxed max-w-2xl">Robust Java application utilizing Frankfurter API endpoints, secure JSON parsing engines, and error fallbacks.</p>
+                                </div>
+                                <div class="flex items-center space-x-3 flex-shrink-0">
+                                    <span class="text-xs font-mono px-2 py-1 bg-white/5 text-neutral-400 rounded">Frankfurter REST</span>
+                                    <svg class="expand-icon w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                                </div>
+                            </div>
+                            <div class="details-content grid grid-cols-1 md:grid-cols-2 gap-8 font-sans">
+                                <div class="space-y-3">
+                                    <h4 class="text-xs uppercase font-bold text-teal-400 tracking-wider">Functional Mission</h4>
+                                    <p class="text-neutral-300 text-sm leading-relaxed">Provide robust exchange rate translations by securely polling globally dispersed bank rate lists.</p>
+                                </div>
+                                <div class="space-y-3">
+                                    <h4 class="text-xs uppercase font-bold text-teal-400 tracking-wider">Technical Core</h4>
+                                    <ul class="text-xs text-neutral-400 space-y-1.5 list-disc pl-4">
+                                        <li>Utilized Java standard HttpURLConnection libraries preserving simple code overhead.</li>
+                                        <li>Coded dynamic parsing structures parsing incoming JSON structures safely.</li>
+                                        <li>Engineered detailed user interaction logs handling unexpected network timeouts.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Project 8: Loan Assets Mobile Application -->
+                        <div class="glass-card p-6 md:p-8 cursor-pointer" onclick="toggleAccordion(this)">
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                <div class="space-y-2">
+                                    <span class="text-xs px-2.5 py-1 rounded-full bg-violet-500/10 text-violet-400 border border-violet-500/20 uppercase tracking-widest font-bold">MOBILE DEVELOPMENT</span>
+                                    <h3 class="text-2xl font-bold">Loan Assets Verification App</h3>
+                                    <p class="text-sm text-neutral-400 leading-relaxed max-w-2xl">Android mobile application utilizing real-time GPS triangulation and Exif metadata embedding for secure financial auditing.</p>
+                                </div>
+                                <div class="flex items-center space-x-3 flex-shrink-0">
+                                    <span class="text-xs font-mono px-2 py-1 bg-white/5 text-neutral-400 rounded">Geotag API</span>
+                                    <svg class="expand-icon w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                                </div>
+                            </div>
+                            <div class="details-content grid grid-cols-1 md:grid-cols-2 gap-8 font-sans">
+                                <div class="space-y-3">
+                                    <h4 class="text-xs uppercase font-bold text-violet-400 tracking-wider">Functional Mission</h4>
+                                    <p class="text-neutral-300 text-sm leading-relaxed">Protects financial institutions against false collateral registrations by auditing and stamping location records onto loan files.</p>
+                                </div>
+                                <div class="space-y-3">
+                                    <h4 class="text-xs uppercase font-bold text-violet-400 tracking-wider">Technical Core</h4>
+                                    <ul class="text-xs text-neutral-400 space-y-1.5 list-disc pl-4">
+                                        <li>Direct integration with Android location service engines using Google Location APIs.</li>
+                                        <li>Hardcoded Exif parsing ensuring coordinates aren't manipulated manually.</li>
+                                        <li>Built local SQLite database registers to hold uploads on patchy networks.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- EXPERIENCE VIEW -->
+            <section id="experience-view" class="page-section">
+                <div class="space-y-8">
+                    <div class="glass-card p-8">
+                        <span class="text-xs uppercase font-extrabold tracking-widest text-indigo-400">Professional Records</span>
+                        <h2 class="text-3xl font-extrabold tracking-tight mt-2">INTERNSHIP HISTORY</h2>
+                        <p class="text-neutral-400 text-sm mt-1">Details on system roles, projects delivered, and official verification pipelines.</p>
+                    </div>
+
+                    <div class="space-y-8">
+                        <!-- Infosys -->
+                        <div class="glass-card p-8 flex flex-col md:flex-row justify-between gap-6 hover:border-blue-500/30">
+                            <div class="space-y-4 flex-grow">
+                                <span class="text-xs px-2.5 py-1 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold uppercase tracking-widest">Infosys (3 Months)</span>
+                                <h3 class="text-2xl font-bold">SpringBoot Internship — AI & Computer Vision</h3>
+                                <p class="text-neutral-300 text-sm leading-relaxed max-w-3xl">
+                                    Deployed automated safety camera networks using SpringBoot and custom YOLOv8 inference models to protect physical operators. Real-time vision monitoring registered over 90%+ target accuracy, increasing verification efficiency by 70%.
+                                </p>
+                                <div class="flex flex-wrap gap-2 pt-2">
+                                    <span class="text-xs px-2.5 py-1 bg-white/5 border border-white/5 text-neutral-300 rounded">SpringBoot</span>
+                                    <span class="text-xs px-2.5 py-1 bg-white/5 border border-white/5 text-neutral-300 rounded">YOLOv8</span>
+                                    <span class="text-xs px-2.5 py-1 bg-white/5 border border-white/5 text-neutral-300 rounded">CV</span>
+                                </div>
+                            </div>
+                            <div class="flex-shrink-0 flex items-center">
+                                <button onclick="openVerificationModal('1in.png')" class="w-full md:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition-all shadow-lg shadow-indigo-500/10">
+                                    Verify Credentials
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Intelizign -->
+                        <div class="glass-card p-8 flex flex-col md:flex-row justify-between gap-6 hover:border-purple-500/30">
+                            <div class="space-y-4 flex-grow">
+                                <span class="text-xs px-2.5 py-1 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 font-bold uppercase tracking-widest">Intelizign (15 Days)</span>
+                                <h3 class="text-2xl font-bold">Java & Enterprise APIs Developer</h3>
+                                <p class="text-neutral-300 text-sm leading-relaxed max-w-3xl">
+                                    Analyzed high-throughput backend layers handling 1,000+ daily record transactions. Implemented optimized caching rules on REST resources, decreasing database data pull rates by 30%.
+                                </p>
+                                <div class="flex flex-wrap gap-2 pt-2">
+                                    <span class="text-xs px-2.5 py-1 bg-white/5 border border-white/5 text-neutral-300 rounded">Java Standard</span>
+                                    <span class="text-xs px-2.5 py-1 bg-white/5 border border-white/5 text-neutral-300 rounded">REST APIs</span>
+                                    <span class="text-xs px-2.5 py-1 bg-white/5 border border-white/5 text-neutral-300 rounded">Backend Opt</span>
+                                </div>
+                            </div>
+                            <div class="flex-shrink-0 flex items-center">
+                                <button onclick="openVerificationModal('2in.png')" class="w-full md:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition-all shadow-lg shadow-indigo-500/10">
+                                    Verify Credentials
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- MSME -->
+                        <div class="glass-card p-8 flex flex-col md:flex-row justify-between gap-6 hover:border-emerald-500/30">
+                            <div class="space-y-4 flex-grow">
+                                <span class="text-xs px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold uppercase tracking-widest">MSME (15 Days)</span>
+                                <h3 class="text-2xl font-bold">UI/UX Design Specialist</h3>
+                                <p class="text-neutral-300 text-sm leading-relaxed max-w-3xl">
+                                    Constructed user interface mockups ensuring absolute visual responsiveness across modern breakpoints. Leveraged user mapping architectures to decrease interface transaction steps by 25%.
+                                </p>
+                                <div class="flex flex-wrap gap-2 pt-2">
+                                    <span class="text-xs px-2.5 py-1 bg-white/5 border border-white/5 text-neutral-300 rounded">User Testing</span>
+                                    <span class="text-xs px-2.5 py-1 bg-white/5 border border-white/5 text-neutral-300 rounded">Figma</span>
+                                    <span class="text-xs px-2.5 py-1 bg-white/5 border border-white/5 text-neutral-300 rounded">Mobile-First</span>
+                                </div>
+                            </div>
+                            <div class="flex-shrink-0 flex items-center">
+                                <button onclick="openVerificationModal('3in.png')" class="w-full md:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition-all shadow-lg shadow-indigo-500/10">
+                                    Verify Credentials
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- CERTIFICATIONS VIEW -->
+            <section id="certifications-view" class="page-section font-sans">
+                <div class="space-y-8">
+                    <div class="glass-card p-8">
+                        <span class="text-xs uppercase font-extrabold tracking-widest text-indigo-400">Education Auditing</span>
+                        <h2 class="text-3xl font-extrabold tracking-tight mt-2 font-mono">SYSTEM CERTIFICATES</h2>
+                        <p class="text-neutral-400 text-sm mt-1">Select an academy node to verify curriculum credentials and program structures.</p>
+                    </div>
+
+                    <div class="cert-container space-y-4">
+                        
+                        <!-- 1. CISCO -->
+                        <div class="category-header p-5 bg-white/5 flex justify-between items-center" onclick="toggleTray(this)">
+                            <span class="text-lg font-bold tracking-wider">CISCO SYSTEMS</span>
+                            <span class="text-xs px-2.5 py-1 bg-white/5 text-neutral-400 rounded-lg">5 Accreditations</span>
+                        </div>
+                        <div class="cert-tray">
+                            <div class="scroll-container">
+                                <div class="track">
+                                    <a class="cert-pair" href="c1.pdf" target="_blank" rel="noopener"><img src="c1.png" alt="Cisco 1" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=C1'"><img src="cbadge1.png" alt="Cisco 1 Badge" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=C1+Badge'"></a>
+                                    <a class="cert-pair" href="c2.pdf" target="_blank" rel="noopener"><img src="c2.png" alt="Cisco 2" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=C2'"><img src="cbadge2.png" alt="Cisco 2 Badge" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=C2+Badge'"></a>
+                                    <a class="cert-pair" href="c3.pdf" target="_blank" rel="noopener"><img src="c3.png" alt="Cisco 3" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=C3'"><img src="cbadge3.png" alt="Cisco 3 Badge" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=C3+Badge'"></a>
+                                    <a class="cert-pair" href="c4.pdf" target="_blank" rel="noopener"><img src="c4.png" alt="Cisco 4" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=C4'"><img src="cbadge4.png" alt="Cisco 4 Badge" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=C4+Badge'"></a>
+                                    <a class="cert-pair" href="c5.pdf" target="_blank" rel="noopener"><img src="c5.png" alt="Cisco 5" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=C5'"><img src="cbadge5.png" alt="Cisco 5 Badge" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=C5+Badge'"></a>
+                                    <!-- Duplicates for marquee infinite loops -->
+                                    <a class="cert-pair" href="c1.pdf" target="_blank" rel="noopener"><img src="c1.png" alt="Cisco 1" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=C1'"><img src="cbadge1.png" alt="Cisco 1 Badge" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=C1+Badge'"></a>
+                                    <a class="cert-pair" href="c2.pdf" target="_blank" rel="noopener"><img src="c2.png" alt="Cisco 2" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=C2'"><img src="cbadge2.png" alt="Cisco 2 Badge" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=C2+Badge'"></a>
+                                    <a class="cert-pair" href="c3.pdf" target="_blank" rel="noopener"><img src="c3.png" alt="Cisco 3" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=C3'"><img src="cbadge3.png" alt="Cisco 3 Badge" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=C3+Badge'"></a>
+                                    <a class="cert-pair" href="c4.pdf" target="_blank" rel="noopener"><img src="c4.png" alt="Cisco 4" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=C4'"><img src="cbadge4.png" alt="Cisco 4 Badge" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=C4+Badge'"></a>
+                                    <a class="cert-pair" href="c5.pdf" target="_blank" rel="noopener"><img src="c5.png" alt="Cisco 5" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=C5'"><img src="cbadge5.png" alt="Cisco 5 Badge" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=C5+Badge'"></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. COURSERA -->
+                        <div class="category-header p-5 bg-white/5 flex justify-between items-center" onclick="toggleTray(this)">
+                            <span class="text-lg font-bold tracking-wider">COURSERA ACADEMY</span>
+                            <span class="text-xs px-2.5 py-1 bg-white/5 text-neutral-400 rounded-lg">3 Accreditations</span>
+                        </div>
+                        <div class="cert-tray">
+                            <div class="scroll-container">
+                                <div class="track">
+                                    <a class="cert-pair" href="co1.pdf" target="_blank" rel="noopener"><img src="co1.png" alt="Coursera 1" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=CO1'"><img src="cobadge1.png" alt="Coursera 1 Badge" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=CO1+Badge'"></a>
+                                    <a class="cert-pair" href="co2.pdf" target="_blank" rel="noopener"><img src="co2.png" alt="Coursera 2" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=CO2'"><img src="cobadge2.png" alt="Coursera 2 Badge" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=CO2+Badge'"></a>
+                                    <a class="cert-pair" href="co3.pdf" target="_blank" rel="noopener"><img src="co3.png" alt="Coursera 3" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=CO3'"><img src="cobadge3.png" alt="Coursera 3 Badge" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=CO3+Badge'"></a>
+                                    <!-- Duplicates for marquee infinite loops -->
+                                    <a class="cert-pair" href="co1.pdf" target="_blank" rel="noopener"><img src="co1.png" alt="Coursera 1" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=CO1'"><img src="cobadge1.png" alt="Coursera 1 Badge" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=CO1+Badge'"></a>
+                                    <a class="cert-pair" href="co2.pdf" target="_blank" rel="noopener"><img src="co2.png" alt="Coursera 2" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=CO2'"><img src="cobadge2.png" alt="Coursera 2 Badge" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=CO2+Badge'"></a>
+                                    <a class="cert-pair" href="co3.pdf" target="_blank" rel="noopener"><img src="co3.png" alt="Coursera 3" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=CO3'"><img src="cobadge3.png" alt="Coursera 3 Badge" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=CO3+Badge'"></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. HACKER RANK -->
+                        <div class="category-header p-5 bg-white/5 flex justify-between items-center" onclick="toggleTray(this)">
+                            <span class="text-lg font-bold tracking-wider">HACKERRANK CERTIFICATIONS</span>
+                            <span class="text-xs px-2.5 py-1 bg-white/5 text-neutral-400 rounded-lg">6 Certifications</span>
+                        </div>
+                        <div class="cert-tray">
+                            <div class="scroll-container">
+                                <div class="track">
+                                    <a class="cert-pair" href="h1.pdf" target="_blank" rel="noopener"><img src="h1.png" alt="HackerRank 1" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=H1'"></a>
+                                    <a class="cert-pair" href="h2.pdf" target="_blank" rel="noopener"><img src="h2.png" alt="HackerRank 2" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=H2'"></a>
+                                    <a class="cert-pair" href="h3.pdf" target="_blank" rel="noopener"><img src="h3.png" alt="HackerRank 3" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=H3'"></a>
+                                    <a class="cert-pair" href="h4.pdf" target="_blank" rel="noopener"><img src="h4.png" alt="HackerRank 4" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=H4'"></a>
+                                    <a class="cert-pair" href="h5.pdf" target="_blank" rel="noopener"><img src="h5.png" alt="HackerRank 5" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=H5'"></a>
+                                    <a class="cert-pair" href="h6.pdf" target="_blank" rel="noopener"><img src="h6.png" alt="HackerRank 6" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=H6'"></a>
+                                    <!-- Duplicates for marquee infinite loops -->
+                                    <a class="cert-pair" href="h1.pdf" target="_blank" rel="noopener"><img src="h1.png" alt="HackerRank 1" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=H1'"></a>
+                                    <a class="cert-pair" href="h2.pdf" target="_blank" rel="noopener"><img src="h2.png" alt="HackerRank 2" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=H2'"></a>
+                                    <a class="cert-pair" href="h3.pdf" target="_blank" rel="noopener"><img src="h3.png" alt="HackerRank 3" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=H3'"></a>
+                                    <a class="cert-pair" href="h4.pdf" target="_blank" rel="noopener"><img src="h4.png" alt="HackerRank 4" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=H4'"></a>
+                                    <a class="cert-pair" href="h5.pdf" target="_blank" rel="noopener"><img src="h5.png" alt="HackerRank 5" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=H5'"></a>
+                                    <a class="cert-pair" href="h6.pdf" target="_blank" rel="noopener"><img src="h6.png" alt="HackerRank 6" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=H6'"></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. HAYAKAWA (JAPANESE) -->
+                        <div class="category-header p-5 bg-white/5 flex justify-between items-center" onclick="toggleTray(this)">
+                            <span class="text-lg font-bold tracking-wider">HAYAKAWA (JAPANESE)</span>
+                            <span class="text-xs px-2.5 py-1 bg-white/5 text-neutral-400 rounded-lg">1 Accreditation</span>
+                        </div>
+                        <div class="cert-tray">
+                            <div class="p-4 flex justify-center">
+                                <a class="cert-pair" href="ha1.pdf" target="_blank" rel="noopener">
+                                    <img src="ha1.png" alt="Hayakawa" onerror="this.src='https://placehold.co/160x100/1a1a1a/ffffff?text=Hayakawa+JP'">
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- 5. IBM -->
+                        <div class="category-header p-5 bg-white/5 flex justify-between items-center" onclick="toggleTray(this)">
+                            <span class="text-lg font-bold tracking-wider">IBM</span>
+                            <span class="text-xs px-2.5 py-1 bg-white/5 text-neutral-400 rounded-lg">2 Accreditations</span>
+                        </div>
+                        <div class="cert-tray">
+                            <div class="scroll-container">
+                                <div class="track">
+                                    <a class="cert-pair" href="ibm1.pdf" target="_blank" rel="noopener"><img src="ibm1.png" alt="IBM 1" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=IBM1'"><img src="ibmbadge1.png" alt="IBM 1 Badge" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=IBM1+Badge'"></a>
+                                    <a class="cert-pair" href="ibm2.pdf" target="_blank" rel="noopener"><img src="ibm2.png" alt="IBM 2" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=IBM2'"><img src="ibmbadge2.png" alt="IBM 2 Badge" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=IBM2+Badge'"></a>
+                                    <!-- Duplicates for marquee infinite loops -->
+                                    <a class="cert-pair" href="ibm1.pdf" target="_blank" rel="noopener"><img src="ibm1.png" alt="IBM 1" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=IBM1'"><img src="ibmbadge1.png" alt="IBM 1 Badge" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=IBM1+Badge'"></a>
+                                    <a class="cert-pair" href="ibm2.pdf" target="_blank" rel="noopener"><img src="ibm2.png" alt="IBM 2" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=IBM2'"><img src="ibmbadge2.png" alt="IBM 2 Badge" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=IBM2+Badge'"></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 6. INFOSYS -->
+                        <div class="category-header p-5 bg-white/5 flex justify-between items-center" onclick="toggleTray(this)">
+                            <span class="text-lg font-bold tracking-wider">INFOSYS SPRINGBOARD</span>
+                            <span class="text-xs px-2.5 py-1 bg-white/5 text-neutral-400 rounded-lg">19 Certifications</span>
+                        </div>
+                        <div class="cert-tray">
+                            <div class="scroll-container">
+                                <div class="track">
+                                    <a class="cert-pair" href="i1.pdf" target="_blank" rel="noopener"><img src="i1.png" alt="Infosys 1" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=I1'"></a>
+                                    <a class="cert-pair" href="i2.pdf" target="_blank" rel="noopener"><img src="i2.png" alt="Infosys 2" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=I2'"></a>
+                                    <a class="cert-pair" href="i3.pdf" target="_blank" rel="noopener"><img src="i3.png" alt="Infosys 3" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=I3'"></a>
+                                    <a class="cert-pair" href="i4.pdf" target="_blank" rel="noopener"><img src="i4.png" alt="Infosys 4" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=I4'"></a>
+                                    <a class="cert-pair" href="i5.pdf" target="_blank" rel="noopener"><img src="i5.png" alt="Infosys 5" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=I5'"></a>
+                                    <a class="cert-pair" href="i6.pdf" target="_blank" rel="noopener"><img src="i6.png" alt="Infosys 6" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=I6'"></a>
+                                    <a class="cert-pair" href="i7.pdf" target="_blank" rel="noopener"><img src="i7.png" alt="Infosys 7" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=I7'"></a>
+                                    <a class="cert-pair" href="i8.pdf" target="_blank" rel="noopener"><img src="i8.png" alt="Infosys 8" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=I8'"></a>
+                                    <a class="cert-pair" href="i9.pdf" target="_blank" rel="noopener"><img src="i9.png" alt="Infosys 9" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=I9'"></a>
+                                    <a class="cert-pair" href="i10.pdf" target="_blank" rel="noopener"><img src="i10.png" alt="Infosys 10" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=I10'"></a>
+                                    <a class="cert-pair" href="i11.pdf" target="_blank" rel="noopener"><img src="i11.png" alt="Infosys 11" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=I11'"></a>
+                                    <a class="cert-pair" href="i12.pdf" target="_blank" rel="noopener"><img src="i12.png" alt="Infosys 12" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=I12'"></a>
+                                    <a class="cert-pair" href="i13.pdf" target="_blank" rel="noopener"><img src="i13.png" alt="Infosys 13" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=I13'"></a>
+                                    <a class="cert-pair" href="i14.pdf" target="_blank" rel="noopener"><img src="i14.png" alt="Infosys 14" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=I14'"></a>
+                                    <a class="cert-pair" href="i15.pdf" target="_blank" rel="noopener"><img src="i15.png" alt="Infosys 15" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=I15'"></a>
+                                    <a class="cert-pair" href="i16.pdf" target="_blank" rel="noopener"><img src="i16.png" alt="Infosys 16" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=I16'"></a>
+                                    <a class="cert-pair" href="i17.pdf" target="_blank" rel="noopener"><img src="i17.png" alt="Infosys 17" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=I17'"></a>
+                                    <a class="cert-pair" href="i18.pdf" target="_blank" rel="noopener"><img src="i18.png" alt="Infosys 18" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=I18'"></a>
+                                    <a class="cert-pair" href="i19.pdf" target="_blank" rel="noopener"><img src="i19.png" alt="Infosys 19" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=I19'"></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 7. MONGO DB -->
+                        <div class="category-header p-5 bg-white/5 flex justify-between items-center" onclick="toggleTray(this)">
+                            <span class="text-lg font-bold tracking-wider">MONGODB</span>
+                            <span class="text-xs px-2.5 py-1 bg-white/5 text-neutral-400 rounded-lg">1 Accreditation</span>
+                        </div>
+                        <div class="cert-tray">
+                            <div class="p-4 flex justify-center">
+                                <a class="cert-pair" href="m1.pdf" target="_blank" rel="noopener">
+                                    <img src="m1.png" alt="MongoDB" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=MongoDB'"><img src="mbadge1.png" alt="MongoDB Badge" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=Badge'">
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- 8. NPTEL -->
+                        <div class="category-header p-5 bg-white/5 flex justify-between items-center" onclick="toggleTray(this)">
+                            <span class="text-lg font-bold tracking-wider">NPTEL</span>
+                            <span class="text-xs px-2.5 py-1 bg-white/5 text-neutral-400 rounded-lg">3 Accreditations</span>
+                        </div>
+                        <div class="cert-tray">
+                            <div class="scroll-container">
+                                <div class="track">
+                                    <a class="cert-pair" href="n1.pdf" target="_blank" rel="noopener"><img src="n1.png" alt="NPTEL 1" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=N1'"></a>
+                                    <a class="cert-pair" href="n2.pdf" target="_blank" rel="noopener"><img src="n2.png" alt="NPTEL 2" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=N2'"></a>
+                                    <a class="cert-pair" href="n3.pdf" target="_blank" rel="noopener"><img src="n3.png" alt="NPTEL 3" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=N3'"></a>
+                                    <!-- Duplicates for marquee infinite loops -->
+                                    <a class="cert-pair" href="n1.pdf" target="_blank" rel="noopener"><img src="n1.png" alt="NPTEL 1" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=N1'"></a>
+                                    <a class="cert-pair" href="n2.pdf" target="_blank" rel="noopener"><img src="n2.png" alt="NPTEL 2" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=N2'"></a>
+                                    <a class="cert-pair" href="n3.pdf" target="_blank" rel="noopener"><img src="n3.png" alt="NPTEL 3" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=N3'"></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 9. NVIDIA -->
+                        <div class="category-header p-5 bg-white/5 flex justify-between items-center" onclick="toggleTray(this)">
+                            <span class="text-lg font-bold tracking-wider">NVIDIA ACADEMY</span>
+                            <span class="text-xs px-2.5 py-1 bg-white/5 text-neutral-400 rounded-lg">1 Accreditation</span>
+                        </div>
+                        <div class="cert-tray">
+                            <div class="p-4 flex justify-center">
+                                <a class="cert-pair" href="nv1.pdf" target="_blank" rel="noopener">
+                                    <img src="nv1.png" alt="NVIDIA" onerror="this.src='https://placehold.co/160x100/1a1a1a/ffffff?text=NVIDIA+AI'">
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- 10. ORACLE -->
+                        <div class="category-header p-5 bg-white/5 flex justify-between items-center" onclick="toggleTray(this)">
+                            <span class="text-lg font-bold tracking-wider">ORACLE ACADEMY</span>
+                            <span class="text-xs px-2.5 py-1 bg-white/5 text-neutral-400 rounded-lg">1 Accreditation</span>
+                        </div>
+                        <div class="cert-tray">
+                            <div class="p-4 flex justify-center">
+                                <a class="cert-pair" href="o1.png" target="_blank" rel="noopener">
+                                    <img src="o1.png" alt="Oracle" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=Oracle'"><img src="obadge1.png" alt="Oracle Badge" onerror="this.src='https://placehold.co/120x80/1a1a1a/ffffff?text=Badge'">
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- CONTACT VIEW -->
+            <section id="contact-view" class="page-section">
+                <div class="space-y-8">
+                    <div class="glass-card p-8">
+                        <span class="text-xs uppercase font-extrabold tracking-widest text-indigo-400">Secure Handshake Terminal</span>
+                        <h2 class="text-3xl font-extrabold tracking-tight mt-2">COMMUNICATION MATRIX</h2>
+                        <p class="text-neutral-400 text-sm mt-1">Initialize direct data link to Mohammed Sulthan G through secure nodes.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        
+                        <!-- Email Card -->
+                        <div class="glass-card p-8 flex flex-col items-center text-center space-y-6 hover:border-indigo-500/30">
+                            <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            </div>
+                            <div class="space-y-2">
+                                <h3 class="text-xl font-bold font-sans">Email Dispatch</h3>
+                                <p class="text-xs text-neutral-400 font-mono tracking-wider">MSULTHAN139@GMAIL.COM</p>
+                            </div>
+                            <a href="mailto:msulthan139@gmail.com" class="px-6 py-2.5 rounded-full text-xs font-bold border-2 border-indigo-500 text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all shadow-lg shadow-indigo-500/10">SEND MESSAGE</a>
+                        </div>
+
+                        <!-- LinkedIn Card -->
+                        <div class="glass-card p-8 flex flex-col items-center text-center space-y-6 hover:border-blue-500/30">
+                            <div class="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+                            </div>
+                            <div class="space-y-2">
+                                <h3 class="text-xl font-bold font-sans">LinkedIn Registry</h3>
+                                <p class="text-xs text-neutral-400 font-mono tracking-wider">Professional Profile link</p>
+                            </div>
+                            <a href="https://www.linkedin.com/in/mohammed-sulthan-b64b17308?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" target="_blank" class="px-6 py-2.5 rounded-full text-xs font-bold border-2 border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition-all shadow-lg shadow-blue-500/10">CLICK TO VIEW</a>
+                        </div>
+
+                        <!-- GitHub Card -->
+                        <div class="glass-card p-8 flex flex-col items-center text-center space-y-6 hover:border-neutral-500/30">
+                            <div class="w-16 h-16 rounded-2xl bg-neutral-500/10 border border-neutral-500/20 flex items-center justify-center text-white">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                            </div>
+                            <div class="space-y-2">
+                                <h3 class="text-xl font-bold font-sans">GitHub Directory</h3>
+                                <p class="text-xs text-neutral-400 font-mono tracking-wider">Code repository databases</p>
+                            </div>
+                            <a href="https://github.com/MohammedSulthan07" target="_blank" class="px-6 py-2.5 rounded-full text-xs font-bold border-2 border-white text-white hover:bg-white hover:text-black transition-all shadow-lg shadow-white/10">CLICK TO VIEW</a>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- CORE DOCK MODULE -->
+        <div class="dock-panel">
+            <!-- Home -->
+            <div class="dock-item active" data-target="home-view">
+                <span class="dock-tooltip">Systems Home</span>
+                <div class="dock-icon-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                </div>
+                <div class="m3-pill"></div>
+            </div>
+
+            <!-- About -->
+            <div class="dock-item" data-target="about-view">
+                <span class="dock-tooltip">About Matrix</span>
+                <div class="dock-icon-wrapper">
+                    <span class="dock-text-icon font-mono">me</span>
+                </div>
+                <div class="m3-pill"></div>
+            </div>
+
+            <!-- Skills -->
+            <div class="dock-item" data-target="skills-view">
+                <span class="dock-tooltip">Competencies</span>
+                <div class="dock-icon-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/>
+                    </svg>
+                </div>
+                <div class="m3-pill"></div>
+            </div>
+
+            <!-- Projects -->
+            <div class="dock-item" data-target="projects-view">
+                <span class="dock-tooltip">Engineering Projects</span>
+                <div class="dock-icon-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1.3.5 2.6 1.5 3.5.8.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>
+                    </svg>
+                </div>
+                <div class="m3-pill"></div>
+            </div>
+
+            <!-- Experience -->
+            <div class="dock-item" data-target="experience-view">
+                <span class="dock-tooltip">Internship Records</span>
+                <div class="dock-icon-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 3v18h18"/><path d="m18 10-5 5-4-4-3 3"/>
+                    </svg>
+                </div>
+                <div class="m3-pill"></div>
+            </div>
+
+            <!-- Certifications -->
+            <div class="dock-item" data-target="certifications-view">
+                <span class="dock-tooltip">Auditing Certificates</span>
+                <div class="dock-icon-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 1v17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V1"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M12 16H8"/>
+                    </svg>
+                </div>
+                <div class="m3-pill"></div>
+            </div>
+
+            <!-- Contact -->
+            <div class="dock-item" data-target="contact-view">
+                <span class="dock-tooltip">Send Handshake</span>
+                <div class="dock-icon-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </div>
+                <div class="m3-pill"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Verification Dialog Overlay (Modal Box) -->
+    <div id="credentialsModal" class="modal" onclick="closeVerificationModal()">
+        <div class="relative max-w-4xl w-full flex flex-col items-center gap-4 mx-4" onclick="event.stopPropagation()">
+            <button onclick="closeVerificationModal()" class="self-end text-neutral-400 hover:text-white transition-colors flex items-center gap-2 text-sm font-medium bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
+                <span>DISMISS</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <div class="bg-[#0c0c12]/95 p-3 rounded-2xl shadow-2xl border border-white/10 overflow-hidden w-full flex items-center justify-center">
+                <img id="credentialsImage" src="" alt="System Verification Record Image" class="max-w-full max-h-[75vh] object-contain rounded-xl block">
+            </div>
+        </div>
+    </div>
+
+    <!-- COMPREHENSIVE JAVASCRIPT SYSTEM ENGINE -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- NAVIGATION CONTROL CORE ---
+            const dockItems = document.querySelectorAll('.dock-item');
+            const pageSections = document.querySelectorAll('.page-section');
+
+            dockItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const targetId = item.getAttribute('data-target');
+                    if (!targetId || !document.getElementById(targetId)) return;
+
+                    // Update dock active class statuses
+                    dockItems.forEach(di => di.classList.remove('active'));
+                    item.classList.add('active');
+
+                    // View state transitions
+                    pageSections.forEach(section => {
+                        if (section.id === targetId) {
+                            section.classList.add('active-view');
+                        } else {
+                            section.classList.remove('active-view');
+                        }
+                    });
+                });
+            });
+
+            // --- PROXIMITY MAGNIFICATION PHYSIC (iOS style) ---
+            const dock = document.querySelector('.dock-panel');
+            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+            if (!isTouchDevice && dock) {
+                document.addEventListener('mousemove', (e) => {
+                    const rect = dock.getBoundingClientRect();
+                    const mouseX = e.clientX;
+                    const mouseY = e.clientY;
+
+                    // Hover boundaries trigger
+                    const hoverRadius = 150;
+                    if (mouseY >= rect.top - hoverRadius && mouseY <= rect.bottom + hoverRadius &&
+                        mouseX >= rect.left - hoverRadius && mouseX <= rect.right + hoverRadius) {
+                        
+                        dockItems.forEach(item => {
+                            const iconBox = item.querySelector('.dock-icon-wrapper');
+                            const itemRect = item.getBoundingClientRect();
+                            const itemCenterX = itemRect.left + itemRect.width / 2;
+                            const itemCenterY = itemRect.top + itemRect.height / 2;
+
+                            const distance = Math.sqrt(
+                                Math.pow(mouseX - itemCenterX, 2) + Math.pow(mouseY - itemCenterY, 2)
+                            );
+
+                            // Gaussian dynamic falloff scale mapping
+                            const maxScale = 1.35;
+                            const range = 85;
+                            const scale = 1 + (maxScale - 1) * Math.exp(-Math.pow(distance, 2) / (2 * Math.pow(range, 2)));
+
+                            iconBox.style.transform = `scale(${scale})`;
+                            item.style.transform = `translateY(${-((scale - 1) * 14)}px)`;
+                        });
+                    } else {
+                        resetDockScaling();
+                    }
+                });
+
+                document.addEventListener('mouseleave', resetDockScaling);
+            }
+
+            function resetDockScaling() {
+                dockItems.forEach(item => {
+                    const iconBox = item.querySelector('.dock-icon-wrapper');
+                    if (iconBox) iconBox.style.transform = 'scale(1)';
+                    item.style.transform = 'translateY(0px)';
+                });
+            }
+
+            // --- TRANSLATION LOGIC (Japanese <-> English) ---
+            const translateBtn = document.getElementById('translate-button');
+            const greeting = document.getElementById('greeting');
+            const nameEl = document.getElementById('name');
+            let languageStateEnglish = true;
+
+            const languageMap = {
+                en: { greeting: "HELLO, I'M", name: "MOHAMMED SULTHAN G" },
+                jp: { greeting: "こんにちは, わたしは", name: "モハメド・スルタン" }
+            };
+
+            translateBtn.addEventListener('click', () => {
+                const targetLang = languageStateEnglish ? 'jp' : 'en';
+                greeting.style.opacity = '0';
+                nameEl.style.opacity = '0';
+
+                setTimeout(() => {
+                    greeting.textContent = languageMap[targetLang].greeting;
+                    nameEl.textContent = languageMap[targetLang].name;
+                    greeting.style.opacity = '1';
+                    nameEl.style.opacity = '1';
+                    languageStateEnglish = !languageStateEnglish;
+                }, 300);
+            });
+
+            // --- AUTOMATED ROTATING ROLE ENGINE ---
+            const roles = ["Developer", "UI/UX Designer", "Engineer", "Problem Solver", "Creator", "Open-Source Contributor"];
+            const slot = document.getElementById("slot");
+            const rotatingCard = document.getElementById("rotating-card");
+            let roleCursor = 0;
+
+            function cycleRole(text) {
+                const wordElement = document.createElement("div");
+                wordElement.className = "word";
+                wordElement.textContent = text;
+                slot.appendChild(wordElement);
+
+                // Dynamically resize card to enclose text neatly
+                const measuringTape = document.createElement("span");
+                measuringTape.style.fontSize = getComputedStyle(rotatingCard).fontSize;
+                measuringTape.style.fontWeight = getComputedStyle(rotatingCard).fontWeight;
+                measuringTape.style.fontFamily = getComputedStyle(rotatingCard).fontFamily;
+                measuringTape.style.visibility = "hidden";
+                measuringTape.style.position = "absolute";
+                measuringTape.textContent = text;
+                document.body.appendChild(measuringTape);
+                
+                let targetWidth = Math.max(260, measuringTape.offsetWidth + 60);
+                rotatingCard.style.width = targetWidth + "px";
+                document.body.removeChild(measuringTape);
+
+                requestAnimationFrame(() => wordElement.classList.add("in"));
+
+                setTimeout(() => {
+                    wordElement.classList.remove("in");
+                    wordElement.classList.add("out");
+                    wordElement.addEventListener("animationend", () => {
+                        if (wordElement.classList.contains("out")) wordElement.remove();
+                    }, { once: true });
+                }, 2000);
+            }
+
+            function cycle() {
+                if (document.getElementById('home-view').classList.contains('active-view')) {
+                    cycleRole(roles[roleCursor % roles.length]);
+                    roleCursor++;
+                }
+            }
+
+            cycle();
+            setInterval(cycle, 2600);
+
+            // --- CERTIFICATE ACCORDION TRAY ACTUATORS ---
+            window.toggleTray = function(el) {
+                const isActive = el.classList.contains('active-tray');
+                document.querySelectorAll('.category-header').forEach(ch => {
+                    ch.classList.remove('active-tray');
+                });
+                if (!isActive) {
+                    el.classList.add('active-tray');
+                }
+            };
+
+            // --- PROJECT ACCORDIONS ACTUATORS ---
+            window.toggleAccordion = function(el) {
+                const isExpanded = el.classList.contains('expanded');
+                document.querySelectorAll('.glass-card').forEach(gc => {
+                    gc.classList.remove('expanded');
+                });
+                if (!isExpanded) {
+                    el.classList.add('expanded');
+                }
+            };
+
+            // --- SYSTEM VERIFICATION DIALOG (MODALS) ---
+            const credentialModal = document.getElementById('credentialsModal');
+            const credentialImg = document.getElementById('credentialsImage');
+
+            window.openVerificationModal = function(imgSrc) {
+                credentialImg.src = imgSrc;
+                credentialModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            };
+
+            window.closeVerificationModal = function() {
+                credentialModal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            };
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeVerificationModal();
+            });
+
+            // --- Three.js Liquid Ether Simulation Initialization ---
+            if (window.THREE) {
+                const backgroundEffectConfig = {
+                    mouseForce: 24,
+                    cursorSize: 95,
+                    isViscous: true,
+                    viscous: 30,
+                    iterationsViscous: 32,
+                    iterationsPoisson: 32,
+                    dt: 0.012,
+                    BFECC: true,
+                    resolution: 0.5,
+                    isBounce: false,
+                    colors: ['#3b82f6', '#8b5cf6', '#a855f7'],
+                    autoDemo: true,
+                    autoSpeed: 0.45,
+                    autoIntensity: 1.8,
+                    takeoverDuration: 0.25,
+                    autoResumeDelay: 1000,
+                    autoRampDuration: 0.6
+                };
+                initLiquidEther(backgroundEffectConfig);
+            }
+        });
+
+        // --- LIQUID ETHER COMPILER PIPELINES ---
+        function initLiquidEther(config) {
+            const mountRef = document.getElementById('liquid-ether-background');
+            if (!mountRef) return;
+            
+            let rafRef = null;
+            let isVisible = true;
+
+            function makePaletteTexture(stops) {
+                let arr;
+                if (Array.isArray(stops) && stops.length > 0) {
+                    arr = stops.length === 1 ? [stops[0], stops[0]] : stops;
+                } else {
+                    arr = ['#ffffff', '#ffffff'];
+                }
+                const w = arr.length;
+                const data = new Uint8Array(w * 4);
+                for (let i = 0; i < w; i++) {
+                    const c = new THREE.Color(arr[i]);
+                    data[i * 4 + 0] = Math.round(c.r * 255);
+                    data[i * 4 + 1] = Math.round(c.g * 255);
+                    data[i * 4 + 2] = Math.round(c.b * 255);
+                    data[i * 4 + 3] = 255;
+                }
+                const tex = new THREE.DataTexture(data, w, 1, THREE.RGBAFormat);
+                tex.magFilter = THREE.LinearFilter;
+                tex.minFilter = THREE.LinearFilter;
+                tex.wrapS = THREE.ClampToEdgeWrapping;
+                tex.wrapT = THREE.ClampToEdgeWrapping;
+                tex.generateMipmaps = false;
+                tex.needsUpdate = true;
+                return tex;
+            }
+
+            const paletteTex = makePaletteTexture(config.colors);
+            const bgVec4 = new THREE.Vector4(0, 0, 0, 0);
+
+            class CommonClass {
+                constructor() {
+                    this.width = 0;
+                    this.height = 0;
+                    this.aspect = 1;
+                    this.pixelRatio = 1;
+                    this.time = 0;
+                    this.delta = 0;
+                    this.container = null;
+                    this.renderer = null;
+                    this.clock = null;
+                }
+                init(container) {
+                    this.container = container;
+                    this.pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+                    this.resize();
+                    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                    this.renderer.autoClear = false;
+                    this.renderer.setClearColor(new THREE.Color(0x000000), 0);
+                    this.renderer.setPixelRatio(this.pixelRatio);
+                    this.renderer.setSize(this.width, this.height);
+                    this.renderer.domElement.style.width = '100%';
+                    this.renderer.domElement.style.height = '100%';
+                    this.renderer.domElement.style.display = 'block';
+                    this.clock = new THREE.Clock();
+                    this.clock.start();
+                }
+                resize() {
+                    if (!this.container) return;
+                    const rect = this.container.getBoundingClientRect();
+                    this.width = Math.max(1, Math.floor(rect.width));
+                    this.height = Math.max(1, Math.floor(rect.height));
+                    this.aspect = this.width / this.height;
+                    if (this.renderer) this.renderer.setSize(this.width, this.height, false);
+                }
+                update() {
+                    this.delta = this.clock.getDelta();
+                    this.time += this.delta;
+                }
+            }
+            const Common = new CommonClass();
+
+            class MouseClass {
+                constructor() {
+                    this.mouseMoved = false;
+                    this.coords = new THREE.Vector2();
+                    this.coords_old = new THREE.Vector2();
+                    this.diff = new THREE.Vector2();
+                    this.timer = null;
+                    this.container = null;
+                    this._onMouseMove = this.onDocumentMouseMove.bind(this);
+                    this._onTouchStart = this.onDocumentTouchStart.bind(this);
+                    this._onTouchMove = this.onDocumentTouchMove.bind(this);
+                    this._onMouseEnter = this.onMouseEnter.bind(this);
+                    this._onMouseLeave = this.onMouseLeave.bind(this);
+                    this._onTouchEnd = this.onTouchEnd.bind(this);
+                    this.isHoverInside = false;
+                    this.hasUserControl = false;
+                    this.isAutoActive = false;
+                    this.autoIntensity = 2.0;
+                    this.takeoverActive = false;
+                    this.takeoverStartTime = 0;
+                    this.takeoverDuration = 0.25;
+                    this.takeoverFrom = new THREE.Vector2();
+                    this.takeoverTo = new THREE.Vector2();
+                    this.onInteract = null;
+                }
+                init(container) {
+                    this.container = container;
+                    document.body.addEventListener('mousemove', this._onMouseMove, false);
+                    document.body.addEventListener('touchstart', this._onTouchStart, { passive: false });
+                    document.body.addEventListener('touchmove', this._onTouchMove, { passive: false });
+                    document.body.addEventListener('touchend', this._onTouchEnd, false);
+                    container.addEventListener('mouseenter', this._onMouseEnter, false);
+                    container.addEventListener('mouseleave', this._onMouseLeave, false);
+                }
+                dispose() {
+                    if (!this.container) return;
+                    document.body.removeEventListener('mousemove', this._onMouseMove, false);
+                    document.body.removeEventListener('touchstart', this._onTouchStart, false);
+                    document.body.removeEventListener('touchmove', this._onTouchMove, false);
+                    document.body.removeEventListener('touchend', this._onTouchEnd, false);
+                    this.container.removeEventListener('mouseenter', this._onMouseEnter, false);
+                    this.container.removeEventListener('mouseleave', this._onMouseLeave, false);
+                }
+                setCoords(x, y) {
+                    if (!this.container) return;
+                    if (this.timer) clearTimeout(this.timer);
+                    const rect = this.container.getBoundingClientRect();
+                    const nx = (x - rect.left) / rect.width;
+                    const ny = (y - rect.top) / rect.height;
+                    this.coords.set(nx * 2 - 1, -(ny * 2 - 1));
+                    this.mouseMoved = true;
+                    this.timer = setTimeout(() => {
+                        this.mouseMoved = false;
+                    }, 100);
+                }
+                setNormalized(nx, ny) {
+                    this.coords.set(nx, ny);
+                    this.mouseMoved = true;
+                }
+                onDocumentMouseMove(event) {
+                    if (this.onInteract) this.onInteract();
+                    if (this.isAutoActive && !this.hasUserControl && !this.takeoverActive) {
+                        const rect = this.container.getBoundingClientRect();
+                        const nx = (event.clientX - rect.left) / rect.width;
+                        const ny = (event.clientY - rect.top) / rect.height;
+                        this.takeoverFrom.copy(this.coords);
+                        this.takeoverTo.set(nx * 2 - 1, -(ny * 2 - 1));
+                        this.takeoverStartTime = performance.now();
+                        this.takeoverActive = true;
+                        this.hasUserControl = true;
+                        this.isAutoActive = false;
+                        return;
+                    }
+                    this.setCoords(event.clientX, event.clientY);
+                    this.hasUserControl = true;
+                }
+                onDocumentTouchStart(event) {
+                    if (event.touches.length === 1) {
+                        const t = event.touches[0];
+                        if (this.onInteract) this.onInteract();
+                        this.setCoords(t.pageX, t.pageY);
+                        this.hasUserControl = true;
+                        this.isHoverInside = true;
+                    }
+                }
+                onDocumentTouchMove(event) {
+                    if (event.touches.length === 1) {
+                        const t = event.touches[0];
+                        if (this.onInteract) this.onInteract();
+                        this.setCoords(t.pageX, t.pageY);
+                    }
+                }
+                onTouchEnd() {
+                    this.isHoverInside = false;
+                }
+                onMouseEnter() {
+                    this.isHoverInside = true;
+                }
+                onMouseLeave() {
+                    this.isHoverInside = false;
+                }
+                update() {
+                    if (this.takeoverActive) {
+                        const t = (performance.now() - this.takeoverStartTime) / (this.takeoverDuration * 1000);
+                        if (t >= 1) {
+                            this.takeoverActive = false;
+                            this.coords.copy(this.takeoverTo);
+                            this.coords_old.copy(this.coords);
+                            this.diff.set(0, 0);
+                        } else {
+                            const k = t * t * (3 - 2 * t);
+                            this.coords.copy(this.takeoverFrom).lerp(this.takeoverTo, k);
+                        }
+                    }
+                    this.diff.subVectors(this.coords, this.coords_old);
+                    this.coords_old.copy(this.coords);
+                    if (this.coords_old.x === 0 && this.coords_old.y === 0) this.diff.set(0, 0);
+                    if (this.isAutoActive && !this.takeoverActive) this.diff.multiplyScalar(this.autoIntensity);
+                }
+            }
+            const Mouse = new MouseClass();
+
+            class AutoDriver {
+                constructor(mouse, manager, opts) {
+                    this.mouse = mouse;
+                    this.manager = manager;
+                    this.enabled = opts.enabled;
+                    this.speed = opts.speed;
+                    this.resumeDelay = opts.resumeDelay || 3000;
+                    this.rampDurationMs = (opts.rampDuration || 0) * 1000;
+                    this.active = false;
+                    this.current = new THREE.Vector2(0, 0);
+                    this.target = new THREE.Vector2();
+                    this.lastTime = performance.now();
+                    this.activationTime = 0;
+                    this.margin = 0.2;
+                    this._tmpDir = new THREE.Vector2();
+                    this.pickNewTarget();
+                }
+                pickNewTarget() {
+                    const r = Math.random;
+                    this.target.set((r() * 2 - 1) * (1 - this.margin), (r() * 2 - 1) * (1 - this.margin));
+                }
+                forceStop() {
+                    this.active = false;
+                    this.mouse.isAutoActive = false;
+                }
+                update() {
+                    if (!this.enabled) return;
+                    const now = performance.now();
+                    const idle = now - this.manager.lastUserInteraction;
+                    if (idle < this.resumeDelay) {
+                        if (this.active) this.forceStop();
+                        return;
+                    }
+                    if (this.mouse.isHoverInside) {
+                        if (this.active) this.forceStop();
+                        return;
+                    }
+                    if (!this.active) {
+                        this.active = true;
+                        this.current.copy(this.mouse.coords);
+                        this.lastTime = now;
+                        this.activationTime = now;
+                    }
+                    if (!this.active) return;
+                    this.mouse.isAutoActive = true;
+                    let dtSec = (now - this.lastTime) / 1000;
+                    this.lastTime = now;
+                    if (dtSec > 0.2) dtSec = 0.016;
+                    const dir = this._tmpDir.subVectors(this.target, this.current);
+                    const dist = dir.length();
+                    if (dist < 0.01) {
+                        this.pickNewTarget();
+                        return;
+                    }
+                    dir.normalize();
+                    let ramp = 1;
+                    if (this.rampDurationMs > 0) {
+                        const t = Math.min(1, (now - this.activationTime) / this.rampDurationMs);
+                        ramp = t * t * (3 - 2 * t);
+                    }
+                    const step = this.speed * dtSec * ramp;
+                    const move = Math.min(step, dist);
+                    this.current.addScaledVector(dir, move);
+                    this.mouse.setNormalized(this.current.x, this.current.y);
+                }
+            }
+
+            const face_vert = `attribute vec3 position; uniform vec2 px; uniform vec2 boundarySpace; varying vec2 uv; precision highp float; void main(){ vec3 pos = position; vec2 scale = 1.0 - boundarySpace * 2.0; pos.xy = pos.xy * scale; uv = vec2(0.5)+(pos.xy)*0.5; gl_Position = vec4(pos, 1.0); }`;
+            const line_vert = `attribute vec3 position; uniform vec2 px; precision highp float; varying vec2 uv; void main(){ vec3 pos = position; uv = 0.5 + pos.xy * 0.5; vec2 n = sign(pos.xy); pos.xy = abs(pos.xy) - px * 1.0; pos.xy *= n; gl_Position = vec4(pos, 1.0); }`;
+            const mouse_vert = `precision highp float; attribute vec3 position; attribute vec2 uv; uniform vec2 center; uniform vec2 scale; uniform vec2 px; varying vec2 vUv; void main(){ vec2 pos = position.xy * scale * 2.0 * px + center; vUv = uv; gl_Position = vec4(pos, 0.0, 1.0); }`;
+            const advection_frag = `precision highp float; uniform sampler2D velocity; uniform float dt; uniform bool isBFECC; uniform vec2 fboSize; uniform vec2 px; varying vec2 uv; void main(){ vec2 ratio = max(fboSize.x, fboSize.y) / fboSize; if(isBFECC == false){ vec2 vel = texture2D(velocity, uv).xy; vec2 uv2 = uv - vel * dt * ratio; vec2 newVel = texture2D(velocity, uv2).xy; gl_FragColor = vec4(newVel, 0.0, 0.0); } else { vec2 spot_new = uv; vec2 vel_old = texture2D(velocity, uv).xy; vec2 spot_old = spot_new - vel_old * dt * ratio; vec2 vel_new1 = texture2D(velocity, spot_old).xy; vec2 spot_new2 = spot_old + vel_new1 * dt * ratio; vec2 error = spot_new2 - spot_new; vec2 spot_new3 = spot_new - error / 2.0; vec2 vel_2 = texture2D(velocity, spot_new3).xy; vec2 spot_old2 = spot_new3 - vel_2 * dt * ratio; vec2 newVel2 = texture2D(velocity, spot_old2).xy; gl_FragColor = vec4(newVel2, 0.0, 0.0); } }`;
+            const color_frag = `precision highp float; uniform sampler2D velocity; uniform sampler2D palette; uniform vec4 bgColor; varying vec2 uv; void main(){ vec2 vel = texture2D(velocity, uv).xy; float lenv = clamp(length(vel), 0.0, 1.0); vec3 c = texture2D(palette, vec2(lenv, 0.5)).rgb; vec3 outRGB = mix(bgColor.rgb, c, lenv); float outA = mix(bgColor.a, 1.0, lenv); gl_FragColor = vec4(outRGB, outA); }`;
+            const divergence_frag = `precision highp float; uniform sampler2D velocity; uniform float dt; uniform vec2 px; varying vec2 uv; void main(){ float x0 = texture2D(velocity, uv-vec2(px.x, 0.0)).x; float x1 = texture2D(velocity, uv+vec2(px.x, 0.0)).x; float y0 = texture2D(velocity, uv-vec2(0.0, px.y)).y; float y1 = texture2D(velocity, uv+vec2(0.0, px.y)).y; float divergence = (x1 - x0 + y1 - y0) / 2.0; gl_FragColor = vec4(divergence / dt); }`;
+            const externalForce_frag = `precision highp float; uniform vec2 force; uniform vec2 center; uniform vec2 scale; uniform vec2 px; varying vec2 vUv; void main(){ vec2 circle = (vUv - 0.5) * 2.0; float d = 1.0 - min(length(circle), 1.0); d *= d; gl_FragColor = vec4(force * d, 0.0, 1.0); }`;
+            const poisson_frag = `precision highp float; uniform sampler2D pressure; uniform sampler2D divergence; uniform vec2 px; varying vec2 uv; void main(){ float p0 = texture2D(pressure, uv + vec2(px.x * 2.0, 0.0)).r; float p1 = texture2D(pressure, uv - vec2(px.x * 2.0, 0.0)).r; float p2 = texture2D(pressure, uv + vec2(0.0, px.y * 2.0)).r; float p3 = texture2D(pressure, uv - vec2(0.0, px.y * 2.0)).r; float div = texture2D(divergence, uv).r; float newP = (p0 + p1 + p2 + p3) / 4.0 - div; gl_FragColor = vec4(newP); }`;
+            const pressure_frag = `precision highp float; uniform sampler2D pressure; uniform sampler2D velocity; uniform vec2 px; uniform float dt; varying vec2 uv; void main(){ float step = 1.0; float p0 = texture2D(pressure, uv + vec2(px.x * step, 0.0)).r; float p1 = texture2D(pressure, uv - vec2(px.x * step, 0.0)).r; float p2 = texture2D(pressure, uv + vec2(0.0, px.y * step)).r; float p3 = texture2D(pressure, uv - vec2(0.0, px.y * step)).r; vec2 v = texture2D(velocity, uv).xy; vec2 gradP = vec2(p0 - p1, p2 - p3) * 0.5; v = v - gradP * dt; gl_FragColor = vec4(v, 0.0, 1.0); }`;
+            const viscous_frag = `precision highp float; uniform sampler2D velocity; uniform sampler2D velocity_new; uniform float v; uniform vec2 px; uniform float dt; varying vec2 uv; void main(){ vec2 old = texture2D(velocity, uv).xy; vec2 new0 = texture2D(velocity_new, uv + vec2(px.x * 2.0, 0.0)).xy; vec2 new1 = texture2D(velocity_new, uv - vec2(px.x * 2.0, 0.0)).xy; vec2 new2 = texture2D(velocity_new, uv + vec2(0.0, px.y * 2.0)).xy; vec2 new3 = texture2D(velocity_new, uv - vec2(0.0, px.y * 2.0)).xy; vec2 newv = 4.0 * old + v * dt * (new0 + new1 + new2 + new3); newv /= 4.0 * (1.0 + v * dt); gl_FragColor = vec4(newv, 0.0, 0.0); }`;
+
+            class ShaderPass {
+                constructor(props) { this.props = props || {}; this.uniforms = this.props.material?.uniforms; this.scene = null; this.camera = null; this.material = null; this.geometry = null; this.plane = null; }
+                init() { this.scene = new THREE.Scene(); this.camera = new THREE.Camera(); if (this.uniforms) { this.material = new THREE.RawShaderMaterial(this.props.material); this.geometry = new THREE.PlaneGeometry(2.0, 2.0); this.plane = new THREE.Mesh(this.geometry, this.material); this.scene.add(this.plane); } }
+                update() { Common.renderer.setRenderTarget(this.props.output || null); Common.renderer.render(this.scene, this.camera); Common.renderer.setRenderTarget(null); }
+            }
+
+            class Advection extends ShaderPass {
+                constructor(simProps) { super({ material: { vertexShader: face_vert, fragmentShader: advection_frag, uniforms: { boundarySpace: { value: simProps.cellScale }, px: { value: simProps.cellScale }, fboSize: { value: simProps.fboSize }, velocity: { value: simProps.src.texture }, dt: { value: simProps.dt }, isBFECC: { value: true } } }, output: simProps.dst }); this.uniforms = this.props.material.uniforms; this.init(); }
+                init() { super.init(); this.createBoundary(); }
+                createBoundary() { const boundaryG = new THREE.BufferGeometry(); const vertices_boundary = new Float32Array([-1, -1, 0, -1, 1, 0, -1, 1, 0, 1, 1, 0, 1, 1, 0, 1, -1, 0, 1, -1, 0, -1, -1, 0]); boundaryG.setAttribute('position', new THREE.BufferAttribute(vertices_boundary, 3)); const boundaryM = new THREE.RawShaderMaterial({ vertexShader: line_vert, fragmentShader: advection_frag, uniforms: this.uniforms }); this.line = new THREE.LineSegments(boundaryG, boundaryM); this.scene.add(this.line); }
+                update({ dt, isBounce, BFECC }) { this.uniforms.dt.value = dt; this.line.visible = isBounce; this.uniforms.isBFECC.value = BFECC; super.update(); }
+            }
+
+            class ExternalForce extends ShaderPass {
+                constructor(simProps) { super({ output: simProps.dst }); this.init(simProps); }
+                init(simProps) { super.init(); const mouseG = new THREE.PlaneGeometry(1, 1); const mouseM = new THREE.RawShaderMaterial({ vertexShader: mouse_vert, fragmentShader: externalForce_frag, blending: THREE.AdditiveBlending, depthWrite: false, uniforms: { px: { value: simProps.cellScale }, force: { value: new THREE.Vector2(0.0, 0.0) }, center: { value: new THREE.Vector2(0.0, 0.0) }, scale: { value: new THREE.Vector2(simProps.cursor_size, simProps.cursor_size) } } }); this.mouse = new THREE.Mesh(mouseG, mouseM); this.scene.add(this.mouse); }
+                update(props) { const forceX = (Mouse.diff.x / 2) * props.mouse_force; const forceY = (Mouse.diff.y / 2) * props.mouse_force; const cursorSizeX = props.cursor_size * props.cellScale.x; const cursorSizeY = props.cursor_size * props.cellScale.y; const centerX = Math.min(Math.max(Mouse.coords.x, -1 + cursorSizeX + props.cellScale.x * 2), 1 - cursorSizeX - props.cellScale.x * 2); const centerY = Math.min(Math.max(Mouse.coords.y, -1 + cursorSizeY + props.cellScale.y * 2), 1 - cursorSizeY - props.cellScale.y * 2); const uniforms = this.mouse.material.uniforms; uniforms.force.value.set(forceX, forceY); uniforms.center.value.set(centerX, centerY); uniforms.scale.value.set(props.cursor_size, props.cursor_size); super.update(); }
+            }
+
+            class Viscous extends ShaderPass {
+                constructor(simProps) { super({ material: { vertexShader: face_vert, fragmentShader: viscous_frag, uniforms: { boundarySpace: { value: simProps.boundarySpace }, velocity: { value: simProps.src.texture }, velocity_new: { value: simProps.dst_.texture }, v: { value: simProps.viscous }, px: { value: simProps.cellScale }, dt: { value: simProps.dt } } }, output: simProps.dst, output0: simProps.dst_, output1: simProps.dst }); this.init(); }
+                update({ viscous, iterations, dt }) { let fbo_in, fbo_out; this.uniforms.v.value = viscous; for (let i = 0; i < iterations; i++) { if (i % 2 === 0) { fbo_in = this.props.output0; fbo_out = this.props.output1; } else { fbo_in = this.props.output1; fbo_out = this.props.output0; } this.uniforms.velocity_new.value = fbo_in.texture; this.props.output = fbo_out; this.uniforms.dt.value = dt; super.update(); } return fbo_out; }
+            }
+
+            class Divergence extends ShaderPass {
+                constructor(simProps) { super({ material: { vertexShader: face_vert, fragmentShader: divergence_frag, uniforms: { boundarySpace: { value: simProps.boundarySpace }, velocity: { value: simProps.src.texture }, px: { value: simProps.cellScale }, dt: { value: simProps.dt } } }, output: simProps.dst }); this.init(); }
+                update({ vel }) { this.uniforms.velocity.value = vel.texture; super.update(); }
+            }
+
+            class Poisson extends ShaderPass {
+                constructor(simProps) { super({ material: { vertexShader: face_vert, fragmentShader: poisson_frag, uniforms: { boundarySpace: { value: simProps.boundarySpace }, pressure: { value: simProps.dst_.texture }, divergence: { value: simProps.src.texture }, px: { value: simProps.cellScale } } }, output: simProps.dst, output0: simProps.dst_, output1: simProps.dst }); this.init(); }
+                update({ iterations }) { let p_in, p_out; for (let i = 0; i < iterations; i++) { if (i % 2 === 0) { p_in = this.props.output0; p_out = this.props.output1; } else { p_in = this.props.output1; p_out = this.props.output0; } this.uniforms.pressure.value = p_in.texture; this.props.output = p_out; super.update(); } return p_out; }
+            }
+
+            class Pressure extends ShaderPass {
+                constructor(simProps) { super({ material: { vertexShader: face_vert, fragmentShader: pressure_frag, uniforms: { boundarySpace: { value: simProps.boundarySpace }, pressure: { value: simProps.src_p.texture }, velocity: { value: simProps.src_v.texture }, px: { value: simProps.cellScale }, dt: { value: simProps.dt } } }, output: simProps.dst }); this.init(); }
+                update({ vel, pressure }) { this.uniforms.velocity.value = vel.texture; this.uniforms.pressure.value = pressure.texture; super.update(); }
+            }
+
+            class Simulation {
+                constructor(options) { this.options = { ...options }; this.fbos = { vel_0: null, vel_1: null, vel_viscous0: null, vel_viscous1: null, div: null, pressure_0: null, pressure_1: null }; this.fboSize = new THREE.Vector2(); this.cellScale = new THREE.Vector2(); this.boundarySpace = new THREE.Vector2(); this.init(); }
+                init() { this.calcSize(); this.createAllFBO(); this.createShaderPass(); }
+                getFloatType() { return /(iPad|iPhone|iPod)/i.test(navigator.userAgent) ? THREE.HalfFloatType : THREE.FloatType; }
+                createAllFBO() { const type = this.getFloatType(); const opts = { type, depthBuffer: false, stencilBuffer: false, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, wrapS: THREE.ClampToEdgeWrapping, wrapT: THREE.ClampToEdgeWrapping }; for (let key in this.fbos) { this.fbos[key] = new THREE.WebGLRenderTarget(this.fboSize.x, this.fboSize.y, opts); } }
+                createShaderPass() { this.advection = new Advection({ cellScale: this.cellScale, fboSize: this.fboSize, dt: this.options.dt, src: this.fbos.vel_0, dst: this.fbos.vel_1 }); this.externalForce = new ExternalForce({ cellScale: this.cellScale, cursor_size: this.options.cursor_size, dst: this.fbos.vel_1 }); this.viscous = new Viscous({ cellScale: this.cellScale, boundarySpace: this.boundarySpace, viscous: this.options.viscous, src: this.fbos.vel_1, dst: this.fbos.vel_viscous1, dst_: this.fbos.vel_viscous0, dt: this.options.dt }); this.divergence = new Divergence({ cellScale: this.cellScale, boundarySpace: this.boundarySpace, src: this.fbos.vel_viscous0, dst: this.fbos.div, dt: this.options.dt }); this.poisson = new Poisson({ cellScale: this.cellScale, boundarySpace: this.boundarySpace, src: this.fbos.div, dst: this.fbos.pressure_1, dst_: this.fbos.pressure_0 }); this.pressure = new Pressure({ cellScale: this.cellScale, boundarySpace: this.boundarySpace, src_p: this.fbos.pressure_0, src_v: this.fbos.vel_viscous0, dst: this.fbos.vel_0, dt: this.options.dt }); }
+                calcSize() { const width = Math.max(1, Math.round(this.options.resolution * Common.width)); const height = Math.max(1, Math.round(this.options.resolution * Common.height)); this.cellScale.set(1 / width, 1 / height); this.fboSize.set(width, height); }
+                resize() { this.calcSize(); for (let key in this.fbos) { this.fbos[key].setSize(this.fboSize.x, this.fboSize.y); } }
+                update() { if (this.options.isBounce) { this.boundarySpace.set(0, 0); } else { this.boundarySpace.copy(this.cellScale); } this.advection.update({ dt: this.options.dt, isBounce: this.options.isBounce, BFECC: this.options.BFECC }); this.externalForce.update({ cursor_size: this.options.cursor_size, mouse_force: this.options.mouse_force, cellScale: this.cellScale }); let vel = this.fbos.vel_1; if (this.options.isViscous) { vel = this.viscous.update({ viscous: this.options.viscous, iterations: this.options.iterations_viscous, dt: this.options.dt }); } this.divergence.update({ vel }); const pressure = this.poisson.update({ iterations: this.options.iterations_poisson }); this.pressure.update({ vel, pressure }); }
+            }
+
+            class Output {
+                constructor() { this.init(); }
+                init() { this.simulation = new Simulation({
+                    iterations_poisson: config.iterationsPoisson,
+                    iterations_viscous: config.iterationsViscous,
+                    mouse_force: config.mouseForce,
+                    resolution: config.resolution,
+                    cursor_size: config.cursorSize,
+                    viscous: config.viscous,
+                    isBounce: config.isBounce,
+                    dt: config.dt,
+                    isViscous: config.isViscous,
+                    BFECC: config.BFECC
+                }); this.scene = new THREE.Scene(); this.camera = new THREE.Camera(); this.output = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.RawShaderMaterial({ vertexShader: face_vert, fragmentShader: color_frag, transparent: true, depthWrite: false, uniforms: { velocity: { value: this.simulation.fbos.vel_0.texture }, boundarySpace: { value: new THREE.Vector2() }, palette: { value: paletteTex }, bgColor: { value: bgVec4 } } })); this.scene.add(this.output); }
+                resize() { this.simulation.resize(); }
+                render() { Common.renderer.setRenderTarget(null); Common.renderer.render(this.scene, this.camera); }
+                update() { this.simulation.update(); this.render(); }
+            }
+
+            class WebGLManager {
+                constructor(props) { this.props = props; Common.init(props.$wrapper); Mouse.init(props.$wrapper); Mouse.autoIntensity = props.autoIntensity; Mouse.takeoverDuration = props.takeoverDuration; this.lastUserInteraction = performance.now(); Mouse.onInteract = () => { this.lastUserInteraction = performance.now(); if (this.autoDriver) this.autoDriver.forceStop(); }; this.autoDriver = new AutoDriver(Mouse, this, { enabled: props.autoDemo, speed: props.autoSpeed, resumeDelay: props.autoResumeDelay, rampDuration: props.autoRampDuration }); this.init(); this._loop = this.loop.bind(this); this._resize = this.resize.bind(this); window.addEventListener('resize', this._resize); this._onVisibility = () => { if (document.hidden) { this.pause(); } else if (isVisible) { this.start(); } }; document.addEventListener('visibilitychange', this._onVisibility); this.running = false; }
+                init() { this.props.$wrapper.prepend(Common.renderer.domElement); this.output = new Output(); }
+                resize() { Common.resize(); this.output.resize(); }
+                render() { if (this.autoDriver) this.autoDriver.update(); Mouse.update(); Common.update(); this.output.update(); }
+                loop() { if (!this.running) return; this.render(); rafRef = requestAnimationFrame(this._loop); }
+                start() { if (this.running) return; this.running = true; this._loop(); }
+                pause() { this.running = false; if (rafRef) { cancelAnimationFrame(rafRef); rafRef = null; } }
+                dispose() { try { window.removeEventListener('resize', this._resize); document.removeEventListener('visibilitychange', this._onVisibility); Mouse.dispose(); this.pause(); } catch (e) { console.error(e); } }
+            }
+            
+            const webglManager = new WebGLManager({
+                $wrapper: mountRef,
+                ...config
+            });
+            webglManager.start();
+        }
+
+        // --- GLOBAL SECTION ACTUATOR ---
+        window.activateSection = function(sectionId) {
+            const correspondingDockItem = document.querySelector(`.dock-item[data-target="${sectionId}"]`);
+            if (correspondingDockItem) {
+                correspondingDockItem.click();
+            }
+        };
+    </script>
+</body>
+</html>
